@@ -3,9 +3,11 @@ import { Box, Button, Container, Stack, Typography } from "@mui/material";
 
 interface DashboardProps {
   darkMode: boolean;
+  user: any;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ darkMode }) => {
+const Dashboard: React.FC<DashboardProps> = ({ darkMode, user }) => {
+  console.log("user", user);
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
       <Stack spacing={4}>

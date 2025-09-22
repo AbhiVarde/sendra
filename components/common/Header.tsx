@@ -42,13 +42,15 @@ const Header: React.FC<HeaderProps> = ({
         transition: "all 0.3s ease",
         backgroundColor: isScrolled
           ? darkMode
-            ? "rgba(0, 0, 0, 0.85)"
-            : "rgba(255, 255, 255, 0.85)"
+            ? "rgba(0, 0, 0, 0.1)"
+            : "rgba(255, 255, 255, 0.1)"
           : darkMode
-          ? "#000"
-          : "#fff",
+          ? "rgba(0, 0, 0, 0.1)"
+          : "rgba(255, 255, 255, 0.1)",
         backdropFilter: isScrolled ? "blur(16px)" : "none",
-        border: `1px solid ${darkMode ? "#1a1a1a" : "#e5e5e5"}`,
+        border: `1px solid ${
+          darkMode ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.06)"
+        }`,
         boxShadow: isScrolled
           ? darkMode
             ? "0 4px 20px rgba(0,0,0,0.4)"
@@ -56,7 +58,6 @@ const Header: React.FC<HeaderProps> = ({
           : "none",
       }}
     >
-      {/* Logo */}
       <Stack direction="row" alignItems="center" spacing={1.2}>
         <Box
           sx={{
@@ -82,7 +83,6 @@ const Header: React.FC<HeaderProps> = ({
         </Typography>
       </Stack>
 
-      {/* Right side controls */}
       <Stack direction="row" alignItems="center" spacing={0.5}>
         <IconButton
           onClick={() => setDarkMode(!darkMode)}

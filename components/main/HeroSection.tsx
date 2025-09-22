@@ -1,17 +1,30 @@
 import React from "react";
-import { Box, Container, Typography, Button } from "@mui/material";
+import {
+  Box,
+  Container,
+  Typography,
+  Button,
+  CircularProgress,
+} from "@mui/material";
 import { Github } from "lucide-react";
 
 interface HeroSectionProps {
   darkMode: boolean;
   onSignIn: () => void;
+  loading?: boolean;
 }
 
-const HeroSection: React.FC<HeroSectionProps> = ({ darkMode, onSignIn }) => {
+const HeroSection: React.FC<HeroSectionProps> = ({
+  darkMode,
+  onSignIn,
+  loading = false,
+}) => {
   return (
     <Box
       sx={{
-        py: 8,
+        pt: { xs: "20px", sm: "30px", md: "40px" },
+        pb: { xs: "40px", sm: "60px", md: "80px" },
+        px: { xs: "20px", sm: "40px", md: "0px" },
         textAlign: "center",
       }}
     >
@@ -22,7 +35,8 @@ const HeroSection: React.FC<HeroSectionProps> = ({ darkMode, onSignIn }) => {
             fontWeight: 300,
             lineHeight: 1.2,
             color: darkMode ? "#FFFFFF" : "#000000",
-            mb: 1,
+            mb: "16px",
+            fontSize: { xs: "28px", sm: "36px", md: "48px" },
           }}
         >
           Monitor deployments.
@@ -35,6 +49,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ darkMode, onSignIn }) => {
               lineHeight: 1.2,
               fontStyle: "italic",
               color: darkMode ? "#FAFAFB" : "#333333",
+              fontSize: { xs: "28px", sm: "36px", md: "48px" },
             }}
           >
             Ship with confidence.
@@ -47,25 +62,32 @@ const HeroSection: React.FC<HeroSectionProps> = ({ darkMode, onSignIn }) => {
             fontWeight: 400,
             color: darkMode ? "#FAFAFB" : "#1A1A1A",
             lineHeight: 1.5,
-            mb: 2,
-            maxWidth: "500px",
+            mb: "24px",
+            maxWidth: { xs: "100%", sm: "450px", md: "500px" },
             mx: "auto",
+            fontSize: { xs: "14px", sm: "16px", md: "16px" },
           }}
         >
-          This project monitors your Appwrite deployments in real time. It
-          alerts you instantly when issues arise, helping you resolve them
-          quickly and confidently.
+          Monitor your Appwrite Sites deployments with intelligent error
+          analysis and instant email notifications. Never miss a failure again.
         </Typography>
 
         <Button
           variant="contained"
           onClick={onSignIn}
-          startIcon={<Github size={18} />}
+          disabled={loading}
+          startIcon={
+            loading ? (
+              <CircularProgress size={16} color="inherit" />
+            ) : (
+              <Github size={18} />
+            )
+          }
           sx={{
-            fontSize: "14px",
+            fontSize: { xs: "12px", sm: "14px" },
             fontWeight: 400,
-            py: 0.5,
-            px: 2,
+            py: { xs: 0.5, sm: 0.5 },
+            px: { xs: 1.5, sm: 2 },
             borderRadius: 3,
             backgroundColor: darkMode ? "#FFFFFF" : "#000000",
             color: darkMode ? "#000000" : "#FFFFFF",
@@ -75,9 +97,15 @@ const HeroSection: React.FC<HeroSectionProps> = ({ darkMode, onSignIn }) => {
               boxShadow: "none",
               backgroundColor: darkMode ? "#FAFAFB" : "#1A1A1A",
             },
+            "&:disabled": {
+              backgroundColor: darkMode
+                ? "rgba(255,255,255,0.5)"
+                : "rgba(0,0,0,0.5)",
+              color: darkMode ? "rgba(0,0,0,0.5)" : "rgba(255,255,255,0.5)",
+            },
           }}
         >
-          Sign in with GitHub
+          {loading ? "Signing in..." : "Sign in with GitHub"}
         </Button>
       </Container>
     </Box>
