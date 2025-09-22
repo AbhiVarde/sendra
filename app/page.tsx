@@ -11,7 +11,7 @@ import FeatureSection from "@/components/main/FeatureSection";
 import PulsatingRing from "@/components/common/PulsatingRing";
 
 export default function SendraApp() {
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(true);
   const { user, loading, loginWithGitHub, logout, isLoggedIn } = useAuth();
 
   const handleSignIn = async () => {

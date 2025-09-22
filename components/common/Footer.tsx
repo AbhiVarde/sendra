@@ -170,7 +170,7 @@ const Footer: React.FC<FooterProps> = ({ darkMode }) => {
             </Box>
 
             <Link
-              href="https://github.com/abhivarde"
+              href="https://github.com/AbhiVarde/sendra"
               target="_blank"
               rel="noopener"
               underline="none"
