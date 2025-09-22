@@ -12,38 +12,29 @@ const Footer: React.FC<FooterProps> = ({ darkMode }) => {
       component="footer"
       sx={{
         width: "100%",
-        py: 3,
+        py: { xs: 4, sm: 6 },
         mt: 6,
         display: "flex",
         justifyContent: "center",
       }}
     >
-      <Box
-        sx={{
-          width: "100%",
-          maxWidth: 700,
-          px: { xs: 2, sm: 3 },
-        }}
-      >
-        {/* Minimal divider */}
+      <Box sx={{ width: "100%", maxWidth: 700, px: { xs: 2, sm: 3 } }}>
         <Divider
           sx={{
-            mx: { xs: 3, sm: 5 },
             mb: 3,
             borderColor: darkMode
-              ? "rgba(255,255,255,0.08)"
+              ? "rgba(255,255,255,0.2)"
               : "rgba(0,0,0,0.06)",
           }}
         />
 
-        {/* Main Row: Powered by (left) | Built by + Source (right) */}
         <Stack
           direction={{ xs: "column", sm: "row" }}
           justifyContent="space-between"
           alignItems={{ xs: "center", sm: "center" }}
           spacing={{ xs: 2, sm: 1 }}
+          mb={2}
         >
-          {/* Powered by */}
           <Stack
             direction="row"
             alignItems="center"
@@ -56,10 +47,9 @@ const Footer: React.FC<FooterProps> = ({ darkMode }) => {
             <Typography
               variant="body2"
               sx={{
-                color: darkMode ? "rgba(255,255,255,0.6)" : "rgba(0,0,0,0.6)",
+                color: darkMode ? "#fff" : "rgba(0,0,0,0.6)",
                 fontSize: "13px",
                 fontWeight: 400,
-                mr: "4px",
               }}
             >
               Powered by
@@ -80,7 +70,7 @@ const Footer: React.FC<FooterProps> = ({ darkMode }) => {
                   display: "flex",
                   alignItems: "center",
                   gap: "6px",
-                  color: darkMode ? "rgba(255,255,255,0.8)" : "rgba(0,0,0,0.8)",
+                  color: darkMode ? "#fff" : "rgba(0,0,0,0.8)",
                   fontSize: "13px",
                   fontWeight: 500,
                   transition: "all 0.2s ease",
@@ -97,8 +87,7 @@ const Footer: React.FC<FooterProps> = ({ darkMode }) => {
                   sx={{
                     height: 16,
                     width: "auto",
-                    filter: darkMode ? "brightness(0) invert(1)" : "none",
-                    opacity: 0.9,
+                    filter: "none",
                   }}
                 />
                 Appwrite
@@ -118,7 +107,7 @@ const Footer: React.FC<FooterProps> = ({ darkMode }) => {
                   display: "flex",
                   alignItems: "center",
                   gap: "6px",
-                  color: darkMode ? "rgba(255,255,255,0.8)" : "rgba(0,0,0,0.8)",
+                  color: darkMode ? "#fff" : "rgba(0,0,0,0.8)",
                   fontSize: "13px",
                   fontWeight: 500,
                   transition: "all 0.2s ease",
@@ -132,31 +121,23 @@ const Footer: React.FC<FooterProps> = ({ darkMode }) => {
                   component="img"
                   src="https://resend.com/static/favicons/favicon.ico?v=1"
                   alt="Resend"
-                  sx={{
-                    height: 16,
-                    width: 16,
-                    borderRadius: "2px",
-                  }}
+                  sx={{ height: 16, width: 16, borderRadius: "2px" }}
                 />
                 Resend
               </Link>
             </Stack>
           </Stack>
 
-          {/* Built by + Source */}
           <Stack
             direction={{ xs: "column", sm: "row" }}
             alignItems="center"
             spacing={0.5}
-            sx={{
-              textAlign: { xs: "center", sm: "right" },
-              fontSize: "12px",
-            }}
+            sx={{ textAlign: { xs: "center", sm: "right" }, fontSize: "12px" }}
           >
             <Typography
               variant="body2"
               sx={{
-                color: darkMode ? "rgba(255,255,255,0.6)" : "rgba(0,0,0,0.6)",
+                color: darkMode ? "#fff" : "rgba(0,0,0,0.6)",
                 fontSize: "12px",
                 fontWeight: 400,
                 whiteSpace: "nowrap",
@@ -169,12 +150,9 @@ const Footer: React.FC<FooterProps> = ({ darkMode }) => {
                 rel="noopener"
                 underline="none"
                 sx={{
-                  color: darkMode ? "rgba(255,255,255,0.8)" : "rgba(0,0,0,0.8)",
+                  color: darkMode ? "#fff" : "rgba(0,0,0,0.8)",
                   fontWeight: 500,
-                  transition: "all 0.2s ease",
-                  "&:hover": {
-                    color: darkMode ? "#fff" : "#000",
-                  },
+                  "&:hover": { color: darkMode ? "#fff" : "#000" },
                 }}
               >
                 Abhi Varde
@@ -197,14 +175,13 @@ const Footer: React.FC<FooterProps> = ({ darkMode }) => {
               rel="noopener"
               underline="none"
               sx={{
-                color: darkMode ? "rgba(255,255,255,0.6)" : "rgba(0,0,0,0.6)",
+                color: darkMode ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.6)",
                 fontSize: "12px",
                 fontWeight: 400,
-                transition: "all 0.2s ease",
-                whiteSpace: "nowrap",
                 "&:hover": {
-                  color: darkMode ? "rgba(255,255,255,0.8)" : "rgba(0,0,0,0.8)",
+                  color: darkMode ? "#fff" : "rgba(0,0,0,0.8)",
                 },
+                whiteSpace: "nowrap",
               }}
             >
               Source code on GitHub
@@ -212,36 +189,84 @@ const Footer: React.FC<FooterProps> = ({ darkMode }) => {
           </Stack>
         </Stack>
 
-        {/* Hackathon badge */}
-        <Box sx={{ textAlign: "center", mt: 2.5 }}>
-          <Box
-            sx={{
-              display: "inline-flex",
-              alignItems: "center",
-              px: 2,
-              py: "6px",
-              borderRadius: "16px",
-              background: darkMode
-                ? "linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.02) 100%)"
-                : "linear-gradient(135deg, rgba(0,0,0,0.02) 0%, rgba(0,0,0,0.04) 100%)",
-              border: `1px solid ${
-                darkMode ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"
-              }`,
-            }}
-          >
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          justifyContent="space-between"
+          alignItems={{ xs: "center", sm: "center" }}
+          spacing={{ xs: 1, sm: 0 }}
+          mt={2}
+        >
+          <Stack direction="row" alignItems="center" spacing={0.5}>
             <Typography
               variant="body2"
               sx={{
-                color: darkMode ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.7)",
-                fontSize: "11px",
-                fontWeight: 500,
-                letterSpacing: "0.3px",
+                color: darkMode ? "#fff" : "rgba(0,0,0,0.6)",
+                fontSize: "12px",
+                fontWeight: 400,
               }}
             >
-              Built for #ResendMCPHackathon
+              Deployed by
             </Typography>
+            <Link
+              href="https://vercel.com"
+              target="_blank"
+              rel="noopener"
+              underline="none"
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: "4px",
+                color: darkMode ? "#fff" : "rgba(0,0,0,0.8)",
+                fontWeight: 500,
+                fontSize: "12px",
+                "&:hover": { color: darkMode ? "#fff" : "#000" },
+              }}
+            >
+              <Box
+                component="img"
+                src="https://vercel.com/favicon.ico"
+                alt="Vercel"
+                sx={{ height: 16, width: 16 }}
+              />
+              Vercel
+            </Link>
+          </Stack>
+
+          <Box
+            sx={{
+              textAlign: { xs: "center", sm: "right" },
+              mt: { xs: 1, sm: 0 },
+            }}
+          >
+            <Box
+              sx={{
+                display: "inline-flex",
+                alignItems: "center",
+                px: 2,
+                py: "6px",
+                borderRadius: "16px",
+                background: darkMode
+                  ? "linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.02) 100%)"
+                  : "linear-gradient(135deg, rgba(0,0,0,0.02) 0%, rgba(0,0,0,0.04) 100%)",
+                border: `1px solid ${
+                  darkMode ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.08)"
+                }`,
+              }}
+            >
+              <Typography
+                variant="body2"
+                sx={{
+                  color: darkMode ? "#fff" : "rgba(0,0,0,0.7)",
+                  fontSize: "11px",
+                  fontWeight: 500,
+                  letterSpacing: "0.3px",
+                }}
+              >
+                Built for #ResendMCPHackathon
+              </Typography>
+            </Box>
           </Box>
-        </Box>
+        </Stack>
       </Box>
     </Box>
   );
