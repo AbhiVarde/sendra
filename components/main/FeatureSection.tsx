@@ -49,7 +49,6 @@ const FeatureSection: React.FC<FeatureSectionProps> = ({ darkMode }) => {
       }}
     >
       <Container maxWidth="md">
-        {/* Header */}
         <Box
           sx={{
             textAlign: "center",
@@ -81,8 +80,6 @@ const FeatureSection: React.FC<FeatureSectionProps> = ({ darkMode }) => {
             </Typography>
           </Typography>
         </Box>
-
-        {/* Features Layout - 2 rows: 3 cards top, 2 cards bottom */}
         <Box
           sx={{
             display: "flex",
@@ -90,7 +87,6 @@ const FeatureSection: React.FC<FeatureSectionProps> = ({ darkMode }) => {
             gap: 2,
           }}
         >
-          {/* Top Row: 3 Equal Cards */}
           <Box
             sx={{
               display: "flex",
@@ -151,8 +147,6 @@ const FeatureSection: React.FC<FeatureSectionProps> = ({ darkMode }) => {
               </Box>
             ))}
           </Box>
-
-          {/* Bottom Row: 2 Cards Centered */}
           <Box
             sx={{
               display: "flex",

@@ -74,21 +74,20 @@ const Dashboard: React.FC<DashboardProps> = ({ darkMode, user }) => {
     Record<string, boolean>
   >({});
   const [deleting, setDeleting] = useState<string | null>(null);
-
   const [formData, setFormData] = useState<FormData>({
     projectId: "",
     email: user?.email || "",
     apiKey: "",
   });
 
-  // Check if user has reached the project limit
   const hasReachedLimit = projects.length >= MAX_PROJECTS;
 
-  // Simple API key encoding function (base64)
+  // Encode API key
   const encodeApiKey = useCallback((apiKey: string): string => {
     return btoa(apiKey);
   }, []);
 
+  // Reset form data
   const resetForm = useCallback(() => {
     setFormData({
       projectId: "",
@@ -97,6 +96,7 @@ const Dashboard: React.FC<DashboardProps> = ({ darkMode, user }) => {
     });
   }, [user?.email]);
 
+  // Fetch project deployments
   const fetchProjectDeployments = useCallback(
     async (
       documentId: string,
@@ -130,24 +130,18 @@ const Dashboard: React.FC<DashboardProps> = ({ darkMode, user }) => {
 
           const currentProject = projects.find((p) => p.$id === documentId);
           if (currentProject && currentProject.deployments !== response.total) {
-            try {
-              await databases.updateDocument(
-                process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
-                process.env.NEXT_PUBLIC_APPWRITE_COLLECTION_ID!,
-                documentId,
-                { deployments: response.total }
-              );
+            await databases.updateDocument(
+              process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
+              process.env.NEXT_PUBLIC_APPWRITE_COLLECTION_ID!,
+              documentId,
+              { deployments: response.total }
+            );
 
-              setProjects((prev) =>
-                prev.map((p) =>
-                  p.$id === documentId
-                    ? { ...p, deployments: response.total }
-                    : p
-                )
-              );
-            } catch (updateError) {
-              console.error(`Failed to update deployment count:`, updateError);
-            }
+            setProjects((prev) =>
+              prev.map((p) =>
+                p.$id === documentId ? { ...p, deployments: response.total } : p
+              )
+            );
           }
         } else {
           throw new Error(response.error || "Failed to fetch deployments");
@@ -164,6 +158,7 @@ const Dashboard: React.FC<DashboardProps> = ({ darkMode, user }) => {
     [deploymentLoading, projectDeployments, projects]
   );
 
+  // Fetch all projects
   const fetchProjects = useCallback(
     async (showToast = false) => {
       if (!user?.$id) return;
@@ -206,6 +201,7 @@ const Dashboard: React.FC<DashboardProps> = ({ darkMode, user }) => {
     [user?.$id, projectDeployments, fetchProjectDeployments]
   );
 
+  // Refresh projects and deployments
   const refreshProjects = useCallback(async () => {
     setLoading(true);
     await fetchProjects(true);
@@ -225,6 +221,7 @@ const Dashboard: React.FC<DashboardProps> = ({ darkMode, user }) => {
     setLoading(false);
   }, [fetchProjects, projects, fetchProjectDeployments]);
 
+  // Delete project
   const handleDeleteProject = useCallback(async (project: Project) => {
     if (!project?.$id) return;
 
@@ -237,16 +234,12 @@ const Dashboard: React.FC<DashboardProps> = ({ darkMode, user }) => {
         project.$id
       );
 
-      // Remove from local state
       setProjects((prev) => prev.filter((p) => p.$id !== project.$id));
-
-      // Clean up deployment data
       setProjectDeployments((prev) => {
         const newState = { ...prev };
         delete newState[project.$id!];
         return newState;
       });
-
       setDeploymentLoading((prev) => {
         const newState = { ...prev };
         delete newState[project.$id!];
@@ -268,6 +261,7 @@ const Dashboard: React.FC<DashboardProps> = ({ darkMode, user }) => {
     }
   }, [user?.$id, fetchProjects, projects.length]);
 
+  // Handle form input change
   const handleInputChange = useCallback(
     (field: keyof FormData) => (e: React.ChangeEvent<HTMLInputElement>) => {
       setFormData((prev) => ({ ...prev, [field]: e.target.value }));
@@ -275,6 +269,7 @@ const Dashboard: React.FC<DashboardProps> = ({ darkMode, user }) => {
     []
   );
 
+  // Validate form data
   const validateForm = useCallback((): string => {
     if (!formData.projectId.trim()) return "Project ID is required";
     if (!formData.apiKey.trim()) return "API Key is required";
@@ -293,6 +288,7 @@ const Dashboard: React.FC<DashboardProps> = ({ darkMode, user }) => {
     return "";
   }, [formData, projects, hasReachedLimit]);
 
+  // Handle form submission
   const handleFormSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
@@ -306,7 +302,6 @@ const Dashboard: React.FC<DashboardProps> = ({ darkMode, user }) => {
       setLoading(true);
 
       try {
-        // Encode the API key before storing
         const encodedApiKey = encodeApiKey(formData.apiKey.trim());
 
         const newProject = await databases.createDocument(
@@ -320,7 +315,7 @@ const Dashboard: React.FC<DashboardProps> = ({ darkMode, user }) => {
             isActive: true,
             deployments: 0,
             alerts: 0,
-            apiKey: encodedApiKey, // Store encoded API key
+            apiKey: encodedApiKey,
           }
         );
 
@@ -358,6 +353,7 @@ const Dashboard: React.FC<DashboardProps> = ({ darkMode, user }) => {
     ]
   );
 
+  // Calculate stats
   const stats = useMemo(() => {
     const totalDeployments = Object.values(projectDeployments).reduce(
       (acc, response) => acc + (response?.total || 0),
@@ -371,12 +367,14 @@ const Dashboard: React.FC<DashboardProps> = ({ darkMode, user }) => {
     };
   }, [projects, projectDeployments]);
 
+  // Format duration
   const formatDuration = useCallback((seconds: number) => {
     return seconds > 60
       ? `${Math.floor(seconds / 60)}m ${seconds % 60}s`
       : `${seconds}s`;
   }, []);
 
+  // Get status color
   const getStatusColor = useCallback(
     (status: string) => {
       switch (status.toLowerCase()) {
@@ -459,7 +457,6 @@ const Dashboard: React.FC<DashboardProps> = ({ darkMode, user }) => {
     <Box sx={containerStyle}>
       <Container maxWidth="md">
         <Stack spacing={3}>
-          {/* User Header and Overview */}
           {projects.length > 0 && (
             <Box sx={cardStyle}>
               <Box
@@ -624,7 +621,6 @@ const Dashboard: React.FC<DashboardProps> = ({ darkMode, user }) => {
             </Box>
           )}
 
-          {/* Project Limit Warning */}
           {hasReachedLimit && showForm && (
             <Alert
               severity="warning"
@@ -643,7 +639,6 @@ const Dashboard: React.FC<DashboardProps> = ({ darkMode, user }) => {
             </Alert>
           )}
 
-          {/* Empty State */}
           {projects.length === 0 && !showForm && (
             <Box sx={{ ...cardStyle, p: 4, textAlign: "center" }}>
               <Typography
@@ -693,7 +688,6 @@ const Dashboard: React.FC<DashboardProps> = ({ darkMode, user }) => {
             </Box>
           )}
 
-          {/* Add Project Form */}
           {showForm && (
             <Box sx={{ ...cardStyle, p: 4 }}>
               <Typography
@@ -742,7 +736,7 @@ const Dashboard: React.FC<DashboardProps> = ({ darkMode, user }) => {
                     size="small"
                     sx={textFieldStyle}
                     disabled={hasReachedLimit}
-                    helperText="API key is encoded before storage"
+                    helperText="Ensure your API key includes the 'sites.read' scope for proper functionality."
                     FormHelperTextProps={{
                       sx: {
                         fontSize: "11px",
@@ -827,7 +821,6 @@ const Dashboard: React.FC<DashboardProps> = ({ darkMode, user }) => {
             </Box>
           )}
 
-          {/* Projects List */}
           {projects.length > 0 && (
             <Stack spacing={2}>
               {projects.map((project) => {
@@ -842,7 +835,6 @@ const Dashboard: React.FC<DashboardProps> = ({ darkMode, user }) => {
                     key={project.$id}
                     sx={{ ...cardStyle, p: 0, overflow: "hidden" }}
                   >
-                    {/* Project Header */}
                     <Box sx={{ p: 2 }}>
                       <Box
                         sx={{
@@ -896,7 +888,6 @@ const Dashboard: React.FC<DashboardProps> = ({ darkMode, user }) => {
                             }}
                           />
 
-                          {/* Delete Button */}
                           <IconButton
                             size="small"
                             color="error"
@@ -950,7 +941,6 @@ const Dashboard: React.FC<DashboardProps> = ({ darkMode, user }) => {
                       </Box>
                     </Box>
 
-                    {/* Deployments Table */}
                     {recentDeployments.length > 0 && (
                       <TableContainer>
                         <Table size="small">
@@ -1039,7 +1029,6 @@ const Dashboard: React.FC<DashboardProps> = ({ darkMode, user }) => {
                       </TableContainer>
                     )}
 
-                    {/* No Deployments */}
                     {!isLoadingDeployments &&
                       deploymentData &&
                       recentDeployments.length === 0 && (
