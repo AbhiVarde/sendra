@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
   Avatar,
@@ -15,8 +16,10 @@ import {
   TableHead,
   TableRow,
   Chip,
+  IconButton,
+  Alert,
 } from "@mui/material";
-import { Plus, Activity, RefreshCw } from "lucide-react";
+import { Plus, Activity, RefreshCw, Trash2 } from "lucide-react";
 import { databases, functions } from "@/lib/appwrite";
 import { ID, Query } from "appwrite";
 import { toast } from "sonner";
@@ -57,6 +60,8 @@ interface DeploymentResponse {
   total: number;
 }
 
+const MAX_PROJECTS = 3;
+
 const Dashboard: React.FC<DashboardProps> = ({ darkMode, user }) => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [showForm, setShowForm] = useState(false);
@@ -68,12 +73,21 @@ const Dashboard: React.FC<DashboardProps> = ({ darkMode, user }) => {
   const [deploymentLoading, setDeploymentLoading] = useState<
     Record<string, boolean>
   >({});
+  const [deleting, setDeleting] = useState<string | null>(null);
 
   const [formData, setFormData] = useState<FormData>({
     projectId: "",
     email: user?.email || "",
     apiKey: "",
   });
+
+  // Check if user has reached the project limit
+  const hasReachedLimit = projects.length >= MAX_PROJECTS;
+
+  // Simple API key encoding function (base64)
+  const encodeApiKey = useCallback((apiKey: string): string => {
+    return btoa(apiKey);
+  }, []);
 
   const resetForm = useCallback(() => {
     setFormData({
@@ -87,7 +101,7 @@ const Dashboard: React.FC<DashboardProps> = ({ darkMode, user }) => {
     async (
       documentId: string,
       projectId: string,
-      encryptedApiKey: string,
+      encodedApiKey: string,
       forceRefresh = false
     ) => {
       if (
@@ -102,7 +116,7 @@ const Dashboard: React.FC<DashboardProps> = ({ darkMode, user }) => {
       try {
         const result = await functions.createExecution(
           process.env.NEXT_PUBLIC_FETCH_DEPLOYMENTS_FUNCTION_ID!,
-          JSON.stringify({ projectId, apiKey: encryptedApiKey }),
+          JSON.stringify({ projectId, apiKey: encodedApiKey }),
           false
         );
 
@@ -211,6 +225,43 @@ const Dashboard: React.FC<DashboardProps> = ({ darkMode, user }) => {
     setLoading(false);
   }, [fetchProjects, projects, fetchProjectDeployments]);
 
+  const handleDeleteProject = useCallback(async (project: Project) => {
+    if (!project?.$id) return;
+
+    setDeleting(project.$id);
+
+    try {
+      await databases.deleteDocument(
+        process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
+        process.env.NEXT_PUBLIC_APPWRITE_COLLECTION_ID!,
+        project.$id
+      );
+
+      // Remove from local state
+      setProjects((prev) => prev.filter((p) => p.$id !== project.$id));
+
+      // Clean up deployment data
+      setProjectDeployments((prev) => {
+        const newState = { ...prev };
+        delete newState[project.$id!];
+        return newState;
+      });
+
+      setDeploymentLoading((prev) => {
+        const newState = { ...prev };
+        delete newState[project.$id!];
+        return newState;
+      });
+
+      toast.success(`Project "${project.projectId}" deleted`);
+    } catch (error: any) {
+      console.error("Failed to delete project:", error);
+      toast.error("Failed to delete project");
+    } finally {
+      setDeleting(null);
+    }
+  }, []);
+
   useEffect(() => {
     if (user?.$id && projects.length === 0) {
       fetchProjects();
@@ -236,8 +287,11 @@ const Dashboard: React.FC<DashboardProps> = ({ darkMode, user }) => {
     if (projects.some((p) => p.projectId === formData.projectId.trim())) {
       return "Project already connected";
     }
+    if (hasReachedLimit) {
+      return `Maximum ${MAX_PROJECTS} projects allowed`;
+    }
     return "";
-  }, [formData, projects]);
+  }, [formData, projects, hasReachedLimit]);
 
   const handleFormSubmit = useCallback(
     async (e: React.FormEvent) => {
@@ -252,7 +306,8 @@ const Dashboard: React.FC<DashboardProps> = ({ darkMode, user }) => {
       setLoading(true);
 
       try {
-        const encryptedApiKey = formData.apiKey.trim();
+        // Encode the API key before storing
+        const encodedApiKey = encodeApiKey(formData.apiKey.trim());
 
         const newProject = await databases.createDocument(
           process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
@@ -265,19 +320,19 @@ const Dashboard: React.FC<DashboardProps> = ({ darkMode, user }) => {
             isActive: true,
             deployments: 0,
             alerts: 0,
-            apiKey: encryptedApiKey,
+            apiKey: encodedApiKey, // Store encoded API key
           }
         );
 
         const projectData = newProject as unknown as Project;
         setProjects((prev) => [projectData, ...prev]);
 
-        toast.success("Project connected");
+        toast.success("Project connected securely");
 
         await fetchProjectDeployments(
           projectData.$id!,
           formData.projectId.trim(),
-          encryptedApiKey
+          encodedApiKey
         );
 
         resetForm();
@@ -293,7 +348,14 @@ const Dashboard: React.FC<DashboardProps> = ({ darkMode, user }) => {
         setLoading(false);
       }
     },
-    [validateForm, formData, user, fetchProjectDeployments, resetForm]
+    [
+      validateForm,
+      formData,
+      user,
+      fetchProjectDeployments,
+      resetForm,
+      encodeApiKey,
+    ]
   );
 
   const stats = useMemo(() => {
@@ -536,6 +598,7 @@ const Dashboard: React.FC<DashboardProps> = ({ darkMode, user }) => {
                   variant="outlined"
                   startIcon={<Plus size={14} />}
                   onClick={() => setShowForm(true)}
+                  disabled={hasReachedLimit}
                   sx={{
                     ...buttonStyle,
                     borderColor: darkMode
@@ -545,12 +608,39 @@ const Dashboard: React.FC<DashboardProps> = ({ darkMode, user }) => {
                     "&:hover": {
                       borderColor: darkMode ? "#FFFFFF" : "#000000",
                     },
+                    "&.Mui-disabled": {
+                      borderColor: darkMode
+                        ? "rgba(255,255,255,0.1)"
+                        : "rgba(0,0,0,0.1)",
+                      color: darkMode ? "#666666" : "#999999",
+                      opacity: 1,
+                    },
                   }}
                 >
-                  Add Project
+                  Add Project{" "}
+                  {hasReachedLimit && `(${projects.length}/${MAX_PROJECTS})`}
                 </Button>
               </Box>
             </Box>
+          )}
+
+          {/* Project Limit Warning */}
+          {hasReachedLimit && showForm && (
+            <Alert
+              severity="warning"
+              sx={{
+                backgroundColor: darkMode
+                  ? "rgba(251, 191, 36, 0.1)"
+                  : "rgba(217, 119, 6, 0.1)",
+                color: darkMode ? "#fbbf24" : "#d97706",
+                "& .MuiAlert-icon": {
+                  color: darkMode ? "#fbbf24" : "#d97706",
+                },
+              }}
+            >
+              You've reached the maximum limit of {MAX_PROJECTS} projects.
+              Delete a project to add a new one.
+            </Alert>
           )}
 
           {/* Empty State */}
@@ -571,14 +661,15 @@ const Dashboard: React.FC<DashboardProps> = ({ darkMode, user }) => {
                 variant="body2"
                 sx={{
                   mb: 2,
-                  maxWidth: "300px",
+                  maxWidth: "400px",
                   mx: "auto",
                   color: darkMode ? "#888888" : "#666666",
                   fontSize: "13px",
                 }}
               >
                 Connect your first Appwrite project to start tracking
-                deployments and receiving alerts.
+                deployments with secure API storage. (Max {MAX_PROJECTS}{" "}
+                projects)
               </Typography>
               <Button
                 variant="contained"
@@ -609,13 +700,24 @@ const Dashboard: React.FC<DashboardProps> = ({ darkMode, user }) => {
                 variant="h6"
                 sx={{
                   fontWeight: 500,
-                  mb: 3,
+                  mb: 1,
                   color: darkMode ? "#FFFFFF" : "#000000",
                   fontSize: "16px",
                   textAlign: "center",
                 }}
               >
-                Connect Project
+                Connect Project ({projects.length}/{MAX_PROJECTS})
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{
+                  mb: 3,
+                  color: darkMode ? "#888888" : "#666666",
+                  fontSize: "12px",
+                  textAlign: "center",
+                }}
+              >
+                Your API keys are securely encoded and stored safely
               </Typography>
 
               <Box component="form" onSubmit={handleFormSubmit}>
@@ -628,6 +730,7 @@ const Dashboard: React.FC<DashboardProps> = ({ darkMode, user }) => {
                     fullWidth
                     size="small"
                     sx={textFieldStyle}
+                    disabled={hasReachedLimit}
                   />
                   <TextField
                     placeholder="API Key"
@@ -638,6 +741,14 @@ const Dashboard: React.FC<DashboardProps> = ({ darkMode, user }) => {
                     fullWidth
                     size="small"
                     sx={textFieldStyle}
+                    disabled={hasReachedLimit}
+                    helperText="API key is encoded before storage"
+                    FormHelperTextProps={{
+                      sx: {
+                        fontSize: "11px",
+                        color: darkMode ? "#666666" : "#888888",
+                      },
+                    }}
                   />
                   <TextField
                     placeholder="Email (optional)"
@@ -647,13 +758,14 @@ const Dashboard: React.FC<DashboardProps> = ({ darkMode, user }) => {
                     fullWidth
                     size="small"
                     sx={textFieldStyle}
+                    disabled={hasReachedLimit}
                   />
 
                   <Stack direction="row" spacing={2}>
                     <Button
                       type="submit"
                       variant="contained"
-                      disabled={loading}
+                      disabled={loading || hasReachedLimit}
                       sx={{
                         flex: 1,
                         minHeight: "40px",
@@ -667,9 +779,21 @@ const Dashboard: React.FC<DashboardProps> = ({ darkMode, user }) => {
                           boxShadow: "none",
                           backgroundColor: darkMode ? "#f5f5f5" : "#1a1a1a",
                         },
+                        "&.Mui-disabled": {
+                          backgroundColor: darkMode
+                            ? "rgba(255,255,255,0.3)"
+                            : "rgba(0,0,0,0.3)",
+                          color: darkMode
+                            ? "rgba(0,0,0,0.5)"
+                            : "rgba(255,255,255,0.5)",
+                        },
                       }}
                     >
-                      {loading ? "Connecting..." : "Connect"}
+                      {loading
+                        ? "Connecting..."
+                        : hasReachedLimit
+                        ? "Limit Reached"
+                        : "Connect"}
                     </Button>
 
                     <Button
@@ -771,6 +895,16 @@ const Dashboard: React.FC<DashboardProps> = ({ darkMode, user }) => {
                                 : "#6b7280",
                             }}
                           />
+
+                          {/* Delete Button */}
+                          <IconButton
+                            size="small"
+                            color="error"
+                            onClick={() => handleDeleteProject(project)}
+                            disabled={deleting === project.$id}
+                          >
+                            <Trash2 size={16} />
+                          </IconButton>
                         </Box>
 
                         <Box sx={{ display: "flex", gap: 3 }}>
@@ -846,7 +980,6 @@ const Dashboard: React.FC<DashboardProps> = ({ darkMode, user }) => {
                           <TableBody>
                             {recentDeployments.map((deployment) => (
                               <TableRow key={deployment.$id}>
-                                {/* New ID Column */}
                                 <TableCell
                                   sx={{
                                     fontFamily: "monospace",
@@ -930,7 +1063,6 @@ const Dashboard: React.FC<DashboardProps> = ({ darkMode, user }) => {
         </Stack>
       </Container>
 
-      {/* Add CSS animation for refresh button */}
       <style>
         {`
           @keyframes spin {

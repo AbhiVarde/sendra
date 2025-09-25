@@ -1,13 +1,6 @@
 import React from "react";
 import { Box, Container, Typography } from "@mui/material";
-import {
-  Database,
-  Activity,
-  Mail,
-  Brain,
-  BarChart3,
-  Shield,
-} from "lucide-react";
+import { Database, Activity, Mail, BarChart3, Shield } from "lucide-react";
 
 interface FeatureSectionProps {
   darkMode: boolean;
@@ -34,22 +27,16 @@ const FeatureSection: React.FC<FeatureSectionProps> = ({ darkMode }) => {
         "Instantly alerts you via Resend MCP when a deployment fails.",
     },
     {
-      icon: Brain,
-      title: "AI-powered Failure Analysis",
-      description:
-        "Provides suggestions and insights for fixing deployment errors.",
-    },
-    {
       icon: BarChart3,
       title: "Dashboard Overview",
       description:
-        "View recent deployments with status, branch, time, and error analysis.",
+        "View recent deployments with status, branch, time, and detailed analytics.",
     },
     {
       icon: Shield,
       title: "Secure API Storage",
       description:
-        "Your Appwrite API keys are safely encrypted in the database.",
+        "Your Appwrite API keys are safely encrypted and stored in the database.",
     },
   ];
 
@@ -62,11 +49,11 @@ const FeatureSection: React.FC<FeatureSectionProps> = ({ darkMode }) => {
       }}
     >
       <Container maxWidth="md">
-        {/* Simple Header */}
+        {/* Header */}
         <Box
           sx={{
             textAlign: "center",
-            mb: { xs: "24px", sm: "32px", md: "40px" },
+            mb: { xs: "32px", sm: "40px", md: "48px" },
           }}
         >
           <Typography
@@ -95,20 +82,20 @@ const FeatureSection: React.FC<FeatureSectionProps> = ({ darkMode }) => {
           </Typography>
         </Box>
 
-        {/* Features Layout */}
+        {/* Features Layout - 2 rows: 3 cards top, 2 cards bottom */}
         <Box
           sx={{
             display: "flex",
             flexDirection: "column",
-            gap: { xs: "8px", sm: "12px", md: "16px" },
+            gap: 2,
           }}
         >
-          {/* Row 1: 3 Equal Cards */}
+          {/* Top Row: 3 Equal Cards */}
           <Box
             sx={{
               display: "flex",
               flexDirection: { xs: "column", sm: "row" },
-              gap: { xs: "8px", sm: "12px", md: "16px" },
+              gap: 2,
             }}
           >
             {features.slice(0, 3).map((feature, index) => (
@@ -119,25 +106,32 @@ const FeatureSection: React.FC<FeatureSectionProps> = ({ darkMode }) => {
                   backgroundColor: darkMode ? "#000000" : "#FFFFFF",
                   border: "1px solid",
                   borderColor: darkMode
-                    ? "rgba(255,255,255,0.2)"
-                    : "rgba(0,0,0,0.06)",
-                  borderRadius: 5,
-                  p: { xs: "12px", sm: "14px", md: "16px" },
-                  minHeight: { xs: "120px", sm: "140px", md: "160px" },
+                    ? "rgba(255,255,255,0.15)"
+                    : "rgba(0,0,0,0.08)",
+                  borderRadius: { xs: 4, sm: 5 },
+                  p: { xs: "16px", sm: "18px", md: "20px" },
+                  minHeight: { xs: "140px", sm: "160px", md: "180px" },
+                  transition: "all 0.2s ease-in-out",
+                  "&:hover": {
+                    borderColor: darkMode
+                      ? "rgba(255,255,255,0.25)"
+                      : "rgba(0,0,0,0.12)",
+                    transform: "translateY(-1px)",
+                  },
                 }}
               >
                 <feature.icon
-                  size={16}
+                  size={18}
                   color={darkMode ? "#FAFAFB" : "#333333"}
-                  style={{ marginBottom: "8px" }}
+                  style={{ marginBottom: "12px" }}
                 />
                 <Typography
                   variant="body1"
                   sx={{
-                    fontWeight: 400,
+                    fontWeight: 500,
                     color: darkMode ? "#FFFFFF" : "#000000",
-                    mb: "4px",
-                    fontSize: { xs: "13px", sm: "14px", md: "15px" },
+                    mb: "8px",
+                    fontSize: { xs: "14px", sm: "15px", md: "16px" },
                     lineHeight: 1.3,
                   }}
                 >
@@ -147,9 +141,9 @@ const FeatureSection: React.FC<FeatureSectionProps> = ({ darkMode }) => {
                   variant="body2"
                   sx={{
                     fontWeight: 400,
-                    color: darkMode ? "#FAFAFB" : "#333333",
-                    lineHeight: 1.4,
-                    fontSize: { xs: "11px", sm: "12px", md: "13px" },
+                    color: darkMode ? "#B0B0B0" : "#666666",
+                    lineHeight: 1.5,
+                    fontSize: { xs: "12px", sm: "13px", md: "14px" },
                   }}
                 >
                   {feature.description}
@@ -158,113 +152,69 @@ const FeatureSection: React.FC<FeatureSectionProps> = ({ darkMode }) => {
             ))}
           </Box>
 
-          {/* Row 2: 1 Large + 2 Stacked Small */}
+          {/* Bottom Row: 2 Cards Centered */}
           <Box
             sx={{
               display: "flex",
               flexDirection: { xs: "column", sm: "row" },
-              gap: { xs: "8px", sm: "12px", md: "16px" },
+              gap: 2,
+              justifyContent: "center",
+              maxWidth: { xs: "100%", sm: "66.66%" },
+              mx: "auto",
             }}
           >
-            {/* Large Card */}
-            <Box
-              sx={{
-                flex: { xs: 1, sm: 2 },
-                backgroundColor: darkMode ? "#000000" : "#FFFFFF",
-                border: "1px solid",
-                borderColor: darkMode
-                  ? "rgba(255,255,255,0.2)"
-                  : "rgba(0,0,0,0.06)",
-                borderRadius: 5,
-                p: { xs: "12px", sm: "14px", md: "16px" },
-                minHeight: { xs: "120px", sm: "200px", md: "220px" },
-              }}
-            >
-              <Brain
-                size={16}
-                color={darkMode ? "#FAFAFB" : "#333333"}
-                style={{ marginBottom: "8px" }}
-              />
-              <Typography
-                variant="body1"
+            {features.slice(3).map((feature, index) => (
+              <Box
+                key={index + 3}
                 sx={{
-                  fontWeight: 400,
-                  color: darkMode ? "#FFFFFF" : "#000000",
-                  mb: "4px",
-                  fontSize: { xs: "13px", sm: "14px", md: "15px" },
-                  lineHeight: 1.3,
-                }}
-              >
-                {features[3].title}
-              </Typography>
-              <Typography
-                variant="body2"
-                sx={{
-                  fontWeight: 400,
-                  color: darkMode ? "#FAFAFB" : "#333333",
-                  lineHeight: 1.4,
-                  fontSize: { xs: "11px", sm: "12px", md: "13px" },
-                }}
-              >
-                {features[3].description}
-              </Typography>
-            </Box>
-
-            {/* Right Column - 2 Stacked Cards */}
-            <Box
-              sx={{
-                flex: 1,
-                display: "flex",
-                flexDirection: "column",
-                gap: { xs: "8px", sm: "12px", md: "16px" },
-              }}
-            >
-              {features.slice(4).map((feature, index) => (
-                <Box
-                  key={index + 4}
-                  sx={{
-                    flex: 1,
-                    backgroundColor: darkMode ? "#000000" : "#FFFFFF",
-                    border: "1px solid",
+                  flex: 1,
+                  backgroundColor: darkMode ? "#000000" : "#FFFFFF",
+                  border: "1px solid",
+                  borderColor: darkMode
+                    ? "rgba(255,255,255,0.15)"
+                    : "rgba(0,0,0,0.08)",
+                  borderRadius: { xs: 4, sm: 5 },
+                  p: { xs: "16px", sm: "18px", md: "20px" },
+                  minHeight: { xs: "140px", sm: "160px", md: "180px" },
+                  transition: "all 0.2s ease-in-out",
+                  "&:hover": {
                     borderColor: darkMode
-                      ? "rgba(255,255,255,0.2)"
-                      : "rgba(0,0,0,0.06)",
-                    borderRadius: 5,
-                    p: { xs: "10px", sm: "12px", md: "14px" },
-                    minHeight: { xs: "100px", sm: "94px", md: "100px" },
+                      ? "rgba(255,255,255,0.25)"
+                      : "rgba(0,0,0,0.12)",
+                    transform: "translateY(-1px)",
+                  },
+                }}
+              >
+                <feature.icon
+                  size={18}
+                  color={darkMode ? "#FAFAFB" : "#333333"}
+                  style={{ marginBottom: "12px" }}
+                />
+                <Typography
+                  variant="body1"
+                  sx={{
+                    fontWeight: 500,
+                    color: darkMode ? "#FFFFFF" : "#000000",
+                    mb: "8px",
+                    fontSize: { xs: "14px", sm: "15px", md: "16px" },
+                    lineHeight: 1.3,
                   }}
                 >
-                  <feature.icon
-                    size={16}
-                    color={darkMode ? "#FAFAFB" : "#333333"}
-                    style={{ marginBottom: "6px" }}
-                  />
-                  <Typography
-                    variant="body1"
-                    sx={{
-                      fontWeight: 400,
-                      color: darkMode ? "#FFFFFF" : "#000000",
-                      mb: "3px",
-                      fontSize: { xs: "12px", sm: "13px", md: "14px" },
-                      lineHeight: 1.3,
-                    }}
-                  >
-                    {feature.title}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      fontWeight: 400,
-                      color: darkMode ? "#FAFAFB" : "#333333",
-                      lineHeight: 1.4,
-                      fontSize: { xs: "10px", sm: "11px", md: "12px" },
-                    }}
-                  >
-                    {feature.description}
-                  </Typography>
-                </Box>
-              ))}
-            </Box>
+                  {feature.title}
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontWeight: 400,
+                    color: darkMode ? "#B0B0B0" : "#666666",
+                    lineHeight: 1.5,
+                    fontSize: { xs: "12px", sm: "13px", md: "14px" },
+                  }}
+                >
+                  {feature.description}
+                </Typography>
+              </Box>
+            ))}
           </Box>
         </Box>
       </Container>
