@@ -82,134 +82,94 @@ const FeatureSection: React.FC<FeatureSectionProps> = ({ darkMode }) => {
         </Box>
         <Box
           sx={{
-            display: "flex",
-            flexDirection: "column",
+            display: "grid",
+            gridTemplateColumns: {
+              xs: "1fr",
+              sm: "repeat(2, 1fr)",
+              lg: "repeat(6, 1fr)",
+            },
             gap: 2,
+            justifyContent: "center",
+            maxWidth: "1200px",
+            mx: "auto",
+            "& > *:nth-of-type(1)": {
+              gridColumn: {
+                lg: "1 / 3",
+              },
+            },
+            "& > *:nth-of-type(2)": {
+              gridColumn: {
+                lg: "3 / 5",
+              },
+            },
+            "& > *:nth-of-type(3)": {
+              gridColumn: {
+                lg: "5 / 7",
+              },
+            },
+            "& > *:nth-of-type(4)": {
+              gridColumn: {
+                lg: "2 / 4",
+              },
+            },
+            "& > *:nth-of-type(5)": {
+              gridColumn: {
+                lg: "4 / 6",
+              },
+            },
           }}
         >
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: { xs: "column", sm: "row" },
-              gap: 2,
-            }}
-          >
-            {features.slice(0, 3).map((feature, index) => (
-              <Box
-                key={index}
-                sx={{
-                  flex: 1,
-                  backgroundColor: darkMode ? "#000000" : "#FFFFFF",
-                  border: "1px solid",
+          {features.map((feature, index) => (
+            <Box
+              key={index}
+              sx={{
+                backgroundColor: darkMode ? "#000000" : "#FFFFFF",
+                border: "1px solid",
+                borderColor: darkMode
+                  ? "rgba(255,255,255,0.15)"
+                  : "rgba(0,0,0,0.08)",
+                borderRadius: { xs: 4, sm: 5 },
+                p: { xs: "16px", sm: "18px", md: "20px" },
+                minHeight: { xs: "140px", sm: "160px", md: "180px" },
+                transition: "all 0.2s ease-in-out",
+                "&:hover": {
                   borderColor: darkMode
-                    ? "rgba(255,255,255,0.15)"
-                    : "rgba(0,0,0,0.08)",
-                  borderRadius: { xs: 4, sm: 5 },
-                  p: { xs: "16px", sm: "18px", md: "20px" },
-                  minHeight: { xs: "140px", sm: "160px", md: "180px" },
-                  transition: "all 0.2s ease-in-out",
-                  "&:hover": {
-                    borderColor: darkMode
-                      ? "rgba(255,255,255,0.25)"
-                      : "rgba(0,0,0,0.12)",
-                    transform: "translateY(-1px)",
-                  },
+                    ? "rgba(255,255,255,0.25)"
+                    : "rgba(0,0,0,0.12)",
+                  transform: "translateY(-1px)",
+                },
+              }}
+            >
+              <feature.icon
+                size={18}
+                color={darkMode ? "#FAFAFB" : "#333333"}
+                style={{ marginBottom: "12px" }}
+              />
+              <Typography
+                variant="body1"
+                sx={{
+                  fontWeight: 500,
+                  color: darkMode ? "#FFFFFF" : "#000000",
+                  mb: "8px",
+                  fontSize: { xs: "14px", sm: "15px", md: "16px" },
+                  lineHeight: 1.3,
                 }}
               >
-                <feature.icon
-                  size={18}
-                  color={darkMode ? "#FAFAFB" : "#333333"}
-                  style={{ marginBottom: "12px" }}
-                />
-                <Typography
-                  variant="body1"
-                  sx={{
-                    fontWeight: 500,
-                    color: darkMode ? "#FFFFFF" : "#000000",
-                    mb: "8px",
-                    fontSize: { xs: "14px", sm: "15px", md: "16px" },
-                    lineHeight: 1.3,
-                  }}
-                >
-                  {feature.title}
-                </Typography>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    fontWeight: 400,
-                    color: darkMode ? "#B0B0B0" : "#666666",
-                    lineHeight: 1.5,
-                    fontSize: { xs: "12px", sm: "13px", md: "14px" },
-                  }}
-                >
-                  {feature.description}
-                </Typography>
-              </Box>
-            ))}
-          </Box>
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: { xs: "column", sm: "row" },
-              gap: 2,
-              justifyContent: "center",
-              maxWidth: { xs: "100%", sm: "66.66%" },
-              mx: "auto",
-            }}
-          >
-            {features.slice(3).map((feature, index) => (
-              <Box
-                key={index + 3}
+                {feature.title}
+              </Typography>
+              <Typography
+                variant="body2"
                 sx={{
-                  flex: 1,
-                  backgroundColor: darkMode ? "#000000" : "#FFFFFF",
-                  border: "1px solid",
-                  borderColor: darkMode
-                    ? "rgba(255,255,255,0.15)"
-                    : "rgba(0,0,0,0.08)",
-                  borderRadius: { xs: 4, sm: 5 },
-                  p: { xs: "16px", sm: "18px", md: "20px" },
-                  minHeight: { xs: "140px", sm: "160px", md: "180px" },
-                  transition: "all 0.2s ease-in-out",
-                  "&:hover": {
-                    borderColor: darkMode
-                      ? "rgba(255,255,255,0.25)"
-                      : "rgba(0,0,0,0.12)",
-                    transform: "translateY(-1px)",
-                  },
+                  fontWeight: 400,
+                  color: darkMode ? "#B0B0B0" : "#666666",
+                  lineHeight: 1.5,
+                  fontSize: { xs: "12px", sm: "13px", md: "14px" },
                 }}
               >
-                <feature.icon
-                  size={18}
-                  color={darkMode ? "#FAFAFB" : "#333333"}
-                  style={{ marginBottom: "12px" }}
-                />
-                <Typography
-                  variant="body1"
-                  sx={{
-                    fontWeight: 500,
-                    color: darkMode ? "#FFFFFF" : "#000000",
-                    mb: "8px",
-                    fontSize: { xs: "14px", sm: "15px", md: "16px" },
-                    lineHeight: 1.3,
-                  }}
-                >
-                  {feature.title}
-                </Typography>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    fontWeight: 400,
-                    color: darkMode ? "#B0B0B0" : "#666666",
-                    lineHeight: 1.5,
-                    fontSize: { xs: "12px", sm: "13px", md: "14px" },
-                  }}
-                >
-                  {feature.description}
-                </Typography>
-              </Box>
-            ))}
-          </Box>
+                {feature.description}
+              </Typography>
+            </Box>
+          ))}
         </Box>
       </Container>
     </Box>
