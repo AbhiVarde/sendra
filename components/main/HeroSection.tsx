@@ -68,8 +68,8 @@ const HeroSection: React.FC<HeroSectionProps> = ({
             fontSize: { xs: "14px", sm: "16px", md: "16px" },
           }}
         >
-          Monitor your Appwrite Sites deployments with intelligent error
-          analysis and instant email notifications. Never miss a failure again.
+          Monitor your Appwrite Sites deployments and receive instant email
+          notifications whenever a deployment fails. Never miss a failure again.
         </Typography>
 
         <Button
