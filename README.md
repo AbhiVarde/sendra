@@ -1,36 +1,121 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/AbhiVarde/abhivarde.in)
 
-## Getting Started
+# 🪴 Introducing Sendra
 
-First, run the development server:
+**Monitor Appwrite Sites Deployment.**
+
+Never miss a failed deployment again! Sendra monitors your Appwrite deployments and sends instant email alerts when something goes wrong.
+
+<img width="1200" height="630" alt="og-image" src="./public/og-image.png" />
+
+## 🎯 Problem Solved
+
+Appwrite doesn't send email notifications for failed deployments like Vercel does. Sendra fills this critical gap by monitoring your Appwrite projects and alerting you instantly when deployments fail.
+
+## ✨ Key Features
+
+- 🔐 **Secure GitHub Authentication** - Login with your GitHub account
+- 📊 **Real-time Dashboard** - View your latest deployment status at a glance
+- 🕐 **Automated Monitoring** - Checks deployments every 5 minutes via cron jobs
+- 📧 **Smart Email Alerts** - Only sends emails for NEW failed deployments (no spam!)
+- 🔒 **Encrypted API Keys** - Your Appwrite credentials are safely encrypted
+- 🚀 **Instant Setup** - Just add your Project ID, API Key, and email
+
+## 🛠️ Tech Stack
+
+- **Frontend**: Next.js, Material UI, TypeScript
+- **Backend**: Appwrite Functions & Database
+- **Authentication**: GitHub OAuth
+- **Email Service**: Resend API
+- **Deployment**: Vercel
+- **Security**: Base64 encryption for API keys
+
+## 🚀 How It Works
+
+1. **Login** with GitHub
+2. **Add** your Appwrite Project ID, API Key, and email
+3. **Monitor** - Sendra automatically checks your deployments every 5 minutes
+4. **Get Alerted** - Receive email notifications only for NEW failed deployments
+5. **Stay Updated** - View latest deployment status on your dashboard
+
+## 📦 Installation & Setup
+
+### Prerequisites
+
+- Node.js 18+
+- Appwrite account
+- Resend account for email notifications
+
+### Local Development
 
 ```bash
+# Clone the repository
+git clone https://github.com/AbhiVarde/sendra.git
+cd sendra
+
+# Install dependencies
+npm install
+
+# Set up environment variables
+cp .env.example .env.local
+# Add your GitHub OAuth, Appwrite, and Resend credentials
+
+# Run the development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Environment Variables
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```env
+NEXT_PUBLIC_APPWRITE_PROJECT_ID=
+NEXT_PUBLIC_APPWRITE_ENDPOINT=
+NEXT_PUBLIC_APPWRITE_DATABASE_ID=
+NEXT_PUBLIC_APPWRITE_COLLECTION_ID=
+NEXT_PUBLIC_FETCH_DEPLOYMENTS_FUNCTION_ID=
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🔧 Appwrite Function Setup
 
-## Learn More
+The monitoring logic runs on Appwrite Functions with a cron schedule.
 
-To learn more about Next.js, take a look at the following resources:
+## 🤝 Contributing
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Fork the repository
+2. Create feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'feat: add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Open Pull Request
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+**Development Guidelines:**
 
-## Deploy on Vercel
+- Follow existing code patterns
+- Test error scenarios thoroughly
+- Maintain responsive design
+- Keep commits focused and descriptive
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 💖 Support
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+**Love ErrExplain? Help me keep building!**
+
+💚 **$5 / month - Monthly Supporter**  
+Get recognition in the GitHub README under Supporters.
+
+🌟 **$19 / month - Monthly Sponsor**  
+Support growth and get recognition both in the GitHub README **and** on my portfolio (abhivarde.in).
+
+🚀 **$49 / month - Featured Sponsor**  
+Premium support with **extra visibility**: README + Portfolio + **promotion on Sync UI**.
+
+[👉 Become a Sponsor](https://github.com/sponsors/AbhiVarde)
+
+## License
+
+Sendra is licensed under the [MIT License](http://choosealicense.com/licenses/mit/). All rights reserved.
+
+## Authors
+
+Sendra is created and maintained by [Abhi Varde](https://www.abhivarde.in/).
+
+---
+
+⭐ **Found this helpful? Give it a star!**
