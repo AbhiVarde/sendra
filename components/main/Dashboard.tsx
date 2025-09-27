@@ -82,6 +82,15 @@ const Dashboard: React.FC<DashboardProps> = ({ darkMode, user }) => {
 
   const hasReachedLimit = projects.length >= MAX_PROJECTS;
 
+  useEffect(() => {
+    if (!user) {
+      setProjects([]);
+      setProjectDeployments({});
+      setDeploymentLoading({});
+      setInitialLoading(false);
+    }
+  }, [user]);
+
   // Encode API key
   const encodeApiKey = useCallback((apiKey: string): string => {
     return btoa(apiKey);

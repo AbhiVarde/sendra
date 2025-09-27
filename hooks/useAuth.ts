@@ -43,14 +43,19 @@ export function useAuth() {
   const logout = async () => {
     try {
       toast.loading("Signing out...", { id: "logout-loading" });
-      await authService.logout();
+
       setUser(null);
+
+      await authService.logout();
+
       toast.dismiss("logout-loading");
       toast.success("Signed out successfully");
     } catch (error) {
       console.error("Logout error:", error);
       toast.dismiss("logout-loading");
       toast.error("Failed to sign out. Please try again.");
+
+      setUser(null);
     }
   };
 
@@ -83,6 +88,7 @@ export function useAuth() {
           console.error("OAuth callback failed:", error);
           toast.dismiss("oauth-callback");
           toast.error("Sign in failed. Please try again.");
+          setUser(null);
         } finally {
           setLoading(false);
         }
@@ -93,6 +99,37 @@ export function useAuth() {
       handleOAuthCallback();
     }
   }, [initialized, loading]);
+
+  useEffect(() => {
+    const recheckAuth = async () => {
+      // Only recheck if we think we should be authenticated but user is null
+      const params = new URLSearchParams(window.location.search);
+      const hasOAuthParams = params.get("userId") && params.get("secret");
+
+      if (hasOAuthParams && initialized && !loading && !user) {
+        console.log("Rechecking authentication after OAuth callback...");
+        try {
+          const currentUser = await authService.getCurrentUser();
+          if (currentUser) {
+            setUser(currentUser);
+            toast.success(
+              `Authentication successful! Welcome, ${currentUser.name}!`
+            );
+          } else {
+            toast.error("Authentication failed. Please try signing in again.");
+          }
+        } catch (error) {
+          console.error("Recheck auth error:", error);
+          toast.error(
+            "Authentication verification failed. Please try signing in again."
+          );
+        }
+      }
+    };
+
+    const timer = setTimeout(recheckAuth, 1000);
+    return () => clearTimeout(timer);
+  }, [initialized, loading, user]);
 
   useEffect(() => {
     init();

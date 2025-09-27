@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Box } from "@mui/material";
 import { useAuth } from "@/hooks/useAuth";
 import Header from "@/components/common/Header";
@@ -13,7 +13,12 @@ import { Toaster } from "sonner";
 
 export default function SendraApp() {
   const [darkMode, setDarkMode] = useState(false);
-  const { user, loading, loginWithGitHub, logout, isLoggedIn } = useAuth();
+  const { user, loading, loginWithGitHub, logout, isLoggedIn, initialized } =
+    useAuth();
+
+  useEffect(() => {
+    console.log("Auth state:", { user, loading, isLoggedIn, initialized });
+  }, [user, loading, isLoggedIn, initialized]);
 
   const handleSignIn = async () => {
     try {
@@ -32,7 +37,7 @@ export default function SendraApp() {
   };
 
   // Show loading while initializing
-  if (loading) {
+  if (!initialized || loading) {
     return (
       <Box
         sx={{
