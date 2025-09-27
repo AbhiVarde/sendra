@@ -63,7 +63,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
             color: darkMode ? "#FAFAFB" : "#1A1A1A",
             lineHeight: 1.5,
             mb: "24px",
-            maxWidth: { xs: "100%", sm: "450px", md: "500px" },
+            maxWidth: { xs: "100%", sm: "450px", md: "550px" },
             mx: "auto",
             fontSize: { xs: "14px", sm: "16px", md: "16px" },
           }}
