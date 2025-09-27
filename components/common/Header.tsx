@@ -59,19 +59,7 @@ const Header: React.FC<HeaderProps> = ({
       }}
     >
       <Stack direction="row" alignItems="center" spacing={1.2}>
-        <Box
-          sx={{
-            width: 28,
-            height: 28,
-            backgroundColor: darkMode ? "#fff" : "#000",
-            borderRadius: "8px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Mail size={16} color={darkMode ? "#000" : "#fff"} />
-        </Box>
+        <Mail size={20} color={darkMode ? "#fff" : "#000"} />
         <Typography
           variant="h6"
           sx={{

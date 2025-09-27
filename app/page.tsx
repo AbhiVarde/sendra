@@ -12,7 +12,7 @@ import PulsatingRing from "@/components/common/PulsatingRing";
 import { Toaster } from "sonner";
 
 export default function SendraApp() {
-  const [darkMode, setDarkMode] = useState(true);
+  const [darkMode, setDarkMode] = useState(false);
   const { user, loading, loginWithGitHub, logout, isLoggedIn } = useAuth();
 
   const handleSignIn = async () => {
