@@ -90,7 +90,7 @@ export default function SendraApp() {
           onSignOut={handleSignOut}
         />
 
-        <Box sx={{ flexGrow: 1, pt: 10 }}>
+        <Box sx={{ flexGrow: 1, pt: 12 }}>
           {!isLoggedIn ? (
             <>
               <HeroSection
