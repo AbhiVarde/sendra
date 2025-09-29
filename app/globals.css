@@ -160,6 +160,7 @@ img {
   }
 }
 
+/* Infinite marquee animation */
 @keyframes marquee {
   0% {
     transform: translateX(100%);
@@ -170,23 +171,10 @@ img {
   }
 }
 
-/* Default (large screens) */
 .animate-marquee {
-  animation: marquee 30s linear infinite;
-}
-
-/* Medium devices */
-@media (max-width: 1024px) {
-  .animate-marquee {
-    animation-duration: 20s;
-  }
-}
-
-/* Small devices */
-@media (max-width: 600px) {
-  .animate-marquee {
-    animation-duration: 12s;
-  }
+  display: inline-block;
+  min-width: 100%;
+  animation: marquee 25s linear infinite;
 }
 
 .animate-marquee.paused {
