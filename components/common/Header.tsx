@@ -50,7 +50,7 @@ const Header: React.FC<HeaderProps> = ({
       >
         <Box
           sx={{
-            display: "inline-block",
+            display: "flex",
             whiteSpace: "nowrap",
             animation: "marquee 30s linear infinite",
             animationPlayState: paused ? "paused" : "running",
@@ -59,53 +59,104 @@ const Header: React.FC<HeaderProps> = ({
               "100%": { transform: "translateX(-100%)" },
             },
           }}
+          className="animate-marquee"
           onMouseEnter={() => setPaused(true)}
           onMouseLeave={() => setPaused(false)}
         >
-          <Typography component="span" sx={{ mx: 4, fontSize: "inherit" }}>
-            🚀{" "}
-            <Box component="span" sx={{ fontWeight: 500 }}>
-              Idea Tracker
-            </Box>{" "}
-            (Appwrite Project of the Month) →{" "}
-            <a
-              href="https://idea-tracker-v2.appwrite.network"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              idea-tracker-v2.appwrite.network
-            </a>
-          </Typography>
+          {/* First copy */}
+          <Box sx={{ display: "flex" }}>
+            <Typography component="span" sx={{ mx: 4, fontSize: "inherit" }}>
+              🚀{" "}
+              <Box component="span" sx={{ fontWeight: 500 }}>
+                Idea Tracker
+              </Box>{" "}
+              (Appwrite Project of the Month) →{" "}
+              <a
+                href="https://idea-tracker-v2.appwrite.network"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                idea-tracker-v2.appwrite.network
+              </a>
+            </Typography>
 
-          <Typography component="span" sx={{ mx: 4, fontSize: "inherit" }}>
-            ⚡{" "}
-            <Box component="span" sx={{ fontWeight: 500 }}>
-              Sync UI
-            </Box>{" "}
-            (75+ GitHub stars, used in 70+ countries) →{" "}
-            <a
-              href="https://syncui.design"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              syncui.design
-            </a>
-          </Typography>
+            <Typography component="span" sx={{ mx: 4, fontSize: "inherit" }}>
+              ⚡{" "}
+              <Box component="span" sx={{ fontWeight: 500 }}>
+                Sync UI
+              </Box>{" "}
+              (75+ GitHub stars, used in 70+ countries) →{" "}
+              <a
+                href="https://syncui.design"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                syncui.design
+              </a>
+            </Typography>
 
-          <Typography component="span" sx={{ mx: 4, fontSize: "inherit" }}>
-            🧩{" "}
-            <Box component="span" sx={{ fontWeight: 500 }}>
-              ErrExplain
-            </Box>{" "}
-            (hackathon project with Vercel AI SDK + Appwrite) →{" "}
-            <a
-              href="https://errexplain.appwrite.network"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              errexplain.appwrite.network
-            </a>
-          </Typography>
+            <Typography component="span" sx={{ mx: 4, fontSize: "inherit" }}>
+              🧩{" "}
+              <Box component="span" sx={{ fontWeight: 500 }}>
+                ErrExplain
+              </Box>{" "}
+              (hackathon project with Vercel AI SDK + Appwrite) →{" "}
+              <a
+                href="https://errexplain.appwrite.network"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                errexplain.appwrite.network
+              </a>
+            </Typography>
+          </Box>
+
+          <Box sx={{ display: "flex" }}>
+            <Typography component="span" sx={{ mx: 4, fontSize: "inherit" }}>
+              🚀{" "}
+              <Box component="span" sx={{ fontWeight: 500 }}>
+                Idea Tracker
+              </Box>{" "}
+              (Appwrite Project of the Month) →{" "}
+              <a
+                href="https://idea-tracker-v2.appwrite.network"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                idea-tracker-v2.appwrite.network
+              </a>
+            </Typography>
+
+            <Typography component="span" sx={{ mx: 4, fontSize: "inherit" }}>
+              ⚡{" "}
+              <Box component="span" sx={{ fontWeight: 500 }}>
+                Sync UI
+              </Box>{" "}
+              (75+ GitHub stars, used in 70+ countries) →{" "}
+              <a
+                href="https://syncui.design"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                syncui.design
+              </a>
+            </Typography>
+
+            <Typography component="span" sx={{ mx: 4, fontSize: "inherit" }}>
+              🧩{" "}
+              <Box component="span" sx={{ fontWeight: 500 }}>
+                ErrExplain
+              </Box>{" "}
+              (hackathon project with Vercel AI SDK + Appwrite) →{" "}
+              <a
+                href="https://errexplain.appwrite.network"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                errexplain.appwrite.network
+              </a>
+            </Typography>
+          </Box>
         </Box>
       </Box>
 

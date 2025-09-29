@@ -170,8 +170,23 @@ img {
   }
 }
 
+/* Default (large screens) */
 .animate-marquee {
   animation: marquee 30s linear infinite;
+}
+
+/* Medium devices */
+@media (max-width: 1024px) {
+  .animate-marquee {
+    animation-duration: 20s;
+  }
+}
+
+/* Small devices */
+@media (max-width: 600px) {
+  .animate-marquee {
+    animation-duration: 12s;
+  }
 }
 
 .animate-marquee.paused {
