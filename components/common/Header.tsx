@@ -52,7 +52,6 @@ const Header: React.FC<HeaderProps> = ({
           className={`animate-marquee ${paused ? "paused" : ""}`}
           sx={{
             whiteSpace: "nowrap",
-            py: 0.5,
           }}
           onMouseEnter={() => setPaused(true)}
           onMouseLeave={() => setPaused(false)}
