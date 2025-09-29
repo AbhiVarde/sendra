@@ -24,6 +24,67 @@ const Header: React.FC<HeaderProps> = ({
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        setPaused(false);
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () =>
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, []);
+
+  const announcements = (
+    <>
+      <Typography component="span" sx={{ mx: 4, fontSize: "inherit" }}>
+        🚀{" "}
+        <Box component="span" sx={{ fontWeight: 500 }}>
+          Idea Tracker
+        </Box>{" "}
+        (Appwrite Project of the Month) →{" "}
+        <a
+          href="https://idea-tracker-v2.appwrite.network"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          idea-tracker-v2.appwrite.network
+        </a>
+      </Typography>
+
+      <Typography component="span" sx={{ mx: 4, fontSize: "inherit" }}>
+        ⚡{" "}
+        <Box component="span" sx={{ fontWeight: 500 }}>
+          Sync UI
+        </Box>{" "}
+        (75+ GitHub stars, used in 70+ countries) →{" "}
+        <a
+          href="https://syncui.design"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          syncui.design
+        </a>
+      </Typography>
+
+      <Typography component="span" sx={{ mx: 4, fontSize: "inherit" }}>
+        🧩{" "}
+        <Box component="span" sx={{ fontWeight: 500 }}>
+          ErrExplain
+        </Box>{" "}
+        (hackathon project with Vercel AI SDK + Appwrite) →{" "}
+        <a
+          href="https://errexplain.appwrite.network"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          errexplain.appwrite.network
+        </a>
+      </Typography>
+    </>
+  );
+
   return (
     <Box
       sx={{
@@ -43,63 +104,22 @@ const Header: React.FC<HeaderProps> = ({
           borderBottom: `1px solid ${
             darkMode ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)"
           }`,
-          fontSize: { xs: "12px", sm: "14px" },
+          fontSize: { xs: "11px", sm: "13px", md: "14px" },
           overflow: "hidden",
           py: 0.5,
         }}
+        onMouseEnter={() => setPaused(true)}
+        onMouseLeave={() => setPaused(false)}
       >
         <Box
           className={`animate-marquee ${paused ? "paused" : ""}`}
           sx={{
             whiteSpace: "nowrap",
+            display: "inline-block",
           }}
-          onMouseEnter={() => setPaused(true)}
-          onMouseLeave={() => setPaused(false)}
         >
-          <Typography component="span" sx={{ mx: 4, fontSize: "inherit" }}>
-            🚀{" "}
-            <Box component="span" sx={{ fontWeight: 500 }}>
-              Idea Tracker
-            </Box>{" "}
-            (Appwrite Project of the Month) →{" "}
-            <a
-              href="https://idea-tracker-v2.appwrite.network"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              idea-tracker-v2.appwrite.network
-            </a>
-          </Typography>
-
-          <Typography component="span" sx={{ mx: 4, fontSize: "inherit" }}>
-            ⚡{" "}
-            <Box component="span" sx={{ fontWeight: 500 }}>
-              Sync UI
-            </Box>{" "}
-            (75+ GitHub stars, used in 70+ countries) →{" "}
-            <a
-              href="https://syncui.design"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              syncui.design
-            </a>
-          </Typography>
-
-          <Typography component="span" sx={{ mx: 4, fontSize: "inherit" }}>
-            🧩{" "}
-            <Box component="span" sx={{ fontWeight: 500 }}>
-              ErrExplain
-            </Box>{" "}
-            (hackathon project with Vercel AI SDK + Appwrite) →{" "}
-            <a
-              href="https://errexplain.appwrite.network"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              errexplain.appwrite.network
-            </a>
-          </Typography>
+          {announcements}
+          {announcements}
         </Box>
       </Box>
 
