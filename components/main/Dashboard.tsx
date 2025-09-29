@@ -37,12 +37,14 @@ interface Project {
   isActive: boolean;
   deployments?: number;
   apiKey: string;
+  region: string;
 }
 
 interface FormData {
   projectId: string;
   email: string;
   apiKey: string;
+  region: string;
 }
 
 interface Deployment {
@@ -78,6 +80,7 @@ const Dashboard: React.FC<DashboardProps> = ({ darkMode, user }) => {
     projectId: "",
     email: user?.email || "",
     apiKey: "",
+    region: "fra",
   });
 
   const hasReachedLimit = projects.length >= MAX_PROJECTS;
@@ -102,6 +105,7 @@ const Dashboard: React.FC<DashboardProps> = ({ darkMode, user }) => {
       projectId: "",
       email: user?.email || "",
       apiKey: "",
+      region: "fra",
     });
   }, [user?.email]);
 
@@ -325,6 +329,7 @@ const Dashboard: React.FC<DashboardProps> = ({ darkMode, user }) => {
             deployments: 0,
             alerts: 0,
             apiKey: encodedApiKey,
+            region: formData.region,
           }
         );
 
@@ -753,6 +758,41 @@ const Dashboard: React.FC<DashboardProps> = ({ darkMode, user }) => {
                       },
                     }}
                   />
+
+                  {/* ADD THIS REGION SELECT FIELD */}
+                  <TextField
+                    select
+                    value={formData.region}
+                    onChange={handleInputChange("region")}
+                    required
+                    fullWidth
+                    size="small"
+                    sx={{
+                      ...textFieldStyle,
+                      "& .MuiSelect-select": {
+                        color: darkMode ? "#FFFFFF" : "#000000",
+                        fontSize: "14px",
+                        padding: "10px 12px",
+                      },
+                    }}
+                    SelectProps={{
+                      native: true,
+                    }}
+                    disabled={hasReachedLimit}
+                    helperText="Select your Appwrite Cloud region"
+                    FormHelperTextProps={{
+                      sx: {
+                        fontSize: "11px",
+                        color: darkMode ? "#666666" : "#888888",
+                      },
+                    }}
+                  >
+                    <option value="fra">🇩🇪 Frankfurt (FRA)</option>
+                    <option value="nyc">🇺🇸 New York (NYC)</option>
+                    <option value="syd">🇦🇺 Sydney (SYD)</option>
+                    <option value="sfo">🇺🇸 San Francisco (SFO)</option>
+                  </TextField>
+
                   <TextField
                     placeholder="Email (optional)"
                     type="email"
@@ -763,7 +803,6 @@ const Dashboard: React.FC<DashboardProps> = ({ darkMode, user }) => {
                     sx={textFieldStyle}
                     disabled={hasReachedLimit}
                   />
-
                   <Stack direction="row" spacing={2}>
                     <Button
                       type="submit"
