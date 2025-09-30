@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Box, Stack, Typography, IconButton } from "@mui/material";
 import { Sun, Moon, Mail, LogOut, Github } from "lucide-react";
+import { useMotionValue, animate, motion } from "framer-motion";
+import useMeasure from "react-use-measure";
 
 interface HeaderProps {
   darkMode: boolean;
@@ -16,7 +18,11 @@ const Header: React.FC<HeaderProps> = ({
   onSignOut,
 }) => {
   const [isScrolled, setIsScrolled] = useState(false);
-  const [paused, setPaused] = useState(false);
+  const [currentSpeed, setCurrentSpeed] = useState(50);
+  const [ref, { width }] = useMeasure();
+  const translation = useMotionValue(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [key, setKey] = useState(0);
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
@@ -25,20 +31,50 @@ const Header: React.FC<HeaderProps> = ({
   }, []);
 
   useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (!document.hidden) {
-        setPaused(false);
-      }
-    };
+    let controls;
+    const gap = 0;
+    const contentSize = width + gap;
+    const from = 0;
+    const to = -contentSize / 2;
+    const distanceToTravel = Math.abs(to - from);
+    const duration = distanceToTravel / currentSpeed;
 
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    return () =>
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-  }, []);
+    if (isTransitioning) {
+      const remainingDistance = Math.abs(translation.get() - to);
+      const transitionDuration = remainingDistance / currentSpeed;
+      controls = animate(translation, [translation.get(), to], {
+        ease: "linear",
+        duration: transitionDuration,
+        onComplete: () => {
+          setIsTransitioning(false);
+          setKey((prevKey) => prevKey + 1);
+        },
+      });
+    } else {
+      controls = animate(translation, [from, to], {
+        ease: "linear",
+        duration: duration,
+        repeat: Infinity,
+        repeatType: "loop",
+        repeatDelay: 0,
+        onRepeat: () => {
+          translation.set(from);
+        },
+      });
+    }
+
+    return controls?.stop;
+  }, [key, translation, currentSpeed, width, isTransitioning]);
 
   const announcements = (
     <>
-      <Typography component="span" sx={{ mx: 4, fontSize: "inherit" }}>
+      <Typography
+        component="span"
+        sx={{
+          mx: { xs: 2, sm: 3, md: 4 },
+          fontSize: { xs: "12px", md: "13px", lg: "14px" },
+        }}
+      >
         🚀{" "}
         <Box component="span" sx={{ fontWeight: 500 }}>
           Idea Tracker
@@ -53,7 +89,13 @@ const Header: React.FC<HeaderProps> = ({
         </a>
       </Typography>
 
-      <Typography component="span" sx={{ mx: 4, fontSize: "inherit" }}>
+      <Typography
+        component="span"
+        sx={{
+          mx: { xs: 2, sm: 3, md: 4 },
+          fontSize: { xs: "12px", md: "13px", lg: "14px" },
+        }}
+      >
         ⚡{" "}
         <Box component="span" sx={{ fontWeight: 500 }}>
           Sync UI
@@ -68,7 +110,13 @@ const Header: React.FC<HeaderProps> = ({
         </a>
       </Typography>
 
-      <Typography component="span" sx={{ mx: 4, fontSize: "inherit" }}>
+      <Typography
+        component="span"
+        sx={{
+          mx: { xs: 2, sm: 3, md: 4 },
+          fontSize: { xs: "12px", md: "13px", lg: "14px" },
+        }}
+      >
         🧩{" "}
         <Box component="span" sx={{ fontWeight: 500 }}>
           ErrExplain
@@ -104,23 +152,35 @@ const Header: React.FC<HeaderProps> = ({
           borderBottom: `1px solid ${
             darkMode ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)"
           }`,
-          fontSize: { xs: "11px", sm: "13px", md: "14px" },
+          fontSize: { xs: "11px", sm: "12px", md: "13px", lg: "14px" },
           overflow: "hidden",
           py: 0.5,
         }}
-        onMouseEnter={() => setPaused(true)}
-        onMouseLeave={() => setPaused(false)}
       >
-        <Box
-          className={`animate-marquee ${paused ? "paused" : ""}`}
-          sx={{
-            whiteSpace: "nowrap",
-            display: "inline-block",
+        <motion.div
+          style={{
+            x: translation,
+            display: "flex",
+            width: "max-content",
+            gap: 0,
+          }}
+          ref={ref}
+          onHoverStart={() => {
+            setIsTransitioning(true);
+            setCurrentSpeed(20);
+          }}
+          onHoverEnd={() => {
+            setIsTransitioning(true);
+            setCurrentSpeed(50);
           }}
         >
-          {announcements}
-          {announcements}
-        </Box>
+          <Box sx={{ whiteSpace: "nowrap", display: "inline-block" }}>
+            {announcements}
+          </Box>
+          <Box sx={{ whiteSpace: "nowrap", display: "inline-block" }}>
+            {announcements}
+          </Box>
+        </motion.div>
       </Box>
 
       {/* Main Header */}

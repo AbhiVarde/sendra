@@ -13,11 +13,12 @@
     "@mui/material": "^7.3.2",
     "appwrite": "^20.0.0",
     "crypto-js": "^4.2.0",
-    "framer-motion": "^12.23.18",
+    "framer-motion": "^12.23.22",
     "lucide-react": "^0.544.0",
     "next": "15.5.3",
     "react": "19.1.0",
     "react-dom": "19.1.0",
+    "react-use-measure": "^2.1.7",
     "sonner": "^2.0.7"
   },
   "devDependencies": {
