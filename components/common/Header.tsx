@@ -72,7 +72,7 @@ const Header: React.FC<HeaderProps> = ({
         component="span"
         sx={{
           mx: { xs: 2, sm: 3, md: 4 },
-          fontSize: { xs: "12px", md: "13px", lg: "14px" },
+          fontSize: { xs: "11px", sm: "12px", md: "13px", lg: "14px" },
         }}
       >
         🚀{" "}
@@ -93,7 +93,7 @@ const Header: React.FC<HeaderProps> = ({
         component="span"
         sx={{
           mx: { xs: 2, sm: 3, md: 4 },
-          fontSize: { xs: "12px", md: "13px", lg: "14px" },
+          fontSize: { xs: "11px", sm: "12px", md: "13px", lg: "14px" },
         }}
       >
         ⚡{" "}
@@ -114,7 +114,7 @@ const Header: React.FC<HeaderProps> = ({
         component="span"
         sx={{
           mx: { xs: 2, sm: 3, md: 4 },
-          fontSize: { xs: "12px", md: "13px", lg: "14px" },
+          fontSize: { xs: "11px", sm: "12px", md: "13px", lg: "14px" },
         }}
       >
         🧩{" "}
