@@ -21,7 +21,7 @@ export class AuthService {
 
   async loginWithGitHub(): Promise<void> {
     try {
-      await account.createOAuth2Session(
+      await account.createOAuth2Token(
         OAuthProvider.Github,
         `${window.location.origin}/`,
         `${window.location.origin}/`
