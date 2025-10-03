@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Box, Stack, Typography, IconButton } from "@mui/material";
-import { Sun, Moon, Mail, LogOut, Github } from "lucide-react";
+import { Sun, Moon, Mail, LogOut, Github, BookOpen } from "lucide-react";
 import { useMotionValue, animate, motion } from "framer-motion";
 import useMeasure from "react-use-measure";
 
@@ -236,7 +236,10 @@ const Header: React.FC<HeaderProps> = ({
 
           <Stack direction="row" alignItems="center" spacing={0.5}>
             <IconButton
-              onClick={() => setDarkMode(!darkMode)}
+              component="a"
+              href="https://dev.to/abhivarde/sendra-monitoring-appwrite-sites-deployments-with-nextjs-vercel-resend-5g3g"
+              target="_blank"
+              rel="noopener noreferrer"
               disableRipple
               sx={{
                 color: darkMode ? "#fff" : "#000",
@@ -250,8 +253,9 @@ const Header: React.FC<HeaderProps> = ({
                 },
                 "&:focus": { outline: "none" },
               }}
+              title="Read ErrExplain Blog"
             >
-              {darkMode ? <Sun size={14} /> : <Moon size={14} />}
+              <BookOpen size={14} />
             </IconButton>
 
             <IconButton
@@ -274,6 +278,25 @@ const Header: React.FC<HeaderProps> = ({
               }}
             >
               <Github size={14} />
+            </IconButton>
+
+            <IconButton
+              onClick={() => setDarkMode(!darkMode)}
+              disableRipple
+              sx={{
+                color: darkMode ? "#fff" : "#000",
+                width: 36,
+                height: 36,
+                borderRadius: "12px",
+                "&:hover": {
+                  backgroundColor: darkMode
+                    ? "rgba(255,255,255,0.1)"
+                    : "rgba(0,0,0,0.08)",
+                },
+                "&:focus": { outline: "none" },
+              }}
+            >
+              {darkMode ? <Sun size={14} /> : <Moon size={14} />}
             </IconButton>
 
             {isLoggedIn && (
