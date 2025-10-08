@@ -1203,6 +1203,14 @@ const Dashboard: React.FC<DashboardProps> = ({
                             "&.Mui-disabled": {
                               color: darkMode ? "#666666" : "#999999",
                             },
+                            "&:hover, &:focus, &:active": {
+                              outline: "none",
+                              boxShadow: "none",
+                              borderColor: darkMode
+                                ? "rgba(255,255,255,0.2)"
+                                : "rgba(0,0,0,0.2)",
+                              backgroundColor: "transparent",
+                            },
                           }}
                         >
                           Previous
@@ -1212,7 +1220,6 @@ const Dashboard: React.FC<DashboardProps> = ({
                           variant="body2"
                           sx={{
                             color: darkMode ? "#888888" : "#666666",
-                            fontSize: "13px",
                           }}
                         >
                           Page {currentProjectPage} of {totalPages}
@@ -1239,6 +1246,14 @@ const Dashboard: React.FC<DashboardProps> = ({
                               : "rgba(0,0,0,0.2)",
                             "&.Mui-disabled": {
                               color: darkMode ? "#666666" : "#999999",
+                            },
+                            "&:hover, &:focus, &:active": {
+                              outline: "none",
+                              boxShadow: "none",
+                              borderColor: darkMode
+                                ? "rgba(255,255,255,0.2)"
+                                : "rgba(0,0,0,0.2)",
+                              backgroundColor: "transparent",
                             },
                           }}
                         >
