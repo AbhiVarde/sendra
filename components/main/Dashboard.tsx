@@ -19,8 +19,16 @@ import {
   IconButton,
   Alert,
   MenuItem,
+  Tooltip,
 } from "@mui/material";
-import { Plus, Activity, RefreshCw, Trash2, ChevronDown } from "lucide-react";
+import {
+  Plus,
+  Activity,
+  RefreshCw,
+  Trash2,
+  ChevronDown,
+  ExternalLink,
+} from "lucide-react";
 import { databases, functions } from "@/lib/appwrite";
 import { ID, Query } from "appwrite";
 import { toast } from "sonner";
@@ -61,6 +69,7 @@ interface Deployment {
   totalSize: number;
   $createdAt: string;
   type: string;
+  siteId?: string;
 }
 
 interface DeploymentResponse {
@@ -69,6 +78,8 @@ interface DeploymentResponse {
   deployments: Deployment[];
   total: number;
 }
+
+type StatusFilter = "all" | "ready" | "failed";
 
 const MAX_PROJECTS = 3;
 const DEPLOYMENTS_PER_PAGE = 5;
@@ -100,6 +111,9 @@ const Dashboard: React.FC<DashboardProps> = ({
   const [deleteConfirmProject, setDeleteConfirmProject] =
     useState<Project | null>(null);
   const [currentPage, setCurrentPage] = useState<Record<string, number>>({});
+  const [statusFilter, setStatusFilter] = useState<
+    Record<string, StatusFilter>
+  >({});
 
   const hasReachedLimit = projects.length >= MAX_PROJECTS;
 
@@ -137,6 +151,15 @@ const Dashboard: React.FC<DashboardProps> = ({
       : `${seconds}s`;
   }, []);
 
+  const getConsoleLink = useCallback(
+    (deployment: Deployment, projectId: string, region: string) => {
+      const siteId = deployment.siteId || deployment.resourceId.split("/")[0];
+      const deploymentId = deployment.$id;
+      return `https://cloud.appwrite.io/console/project-${region}-${projectId}/sites/site-${siteId}/deployments/deployment-${deploymentId}`;
+    },
+    []
+  );
+
   const getStatusColor = useCallback(
     (status: string) => {
       switch (status.toLowerCase()) {
@@ -151,18 +174,56 @@ const Dashboard: React.FC<DashboardProps> = ({
     [darkMode]
   );
 
+  const getFilteredDeployments = useCallback(
+    (projectId: string, deployments: Deployment[]) => {
+      const filter = statusFilter[projectId] || "all";
+
+      if (filter === "all") {
+        return deployments;
+      } else if (filter === "ready") {
+        return deployments.filter((d) => d.status === "ready");
+      } else if (filter === "failed") {
+        return deployments.filter((d) => d.status === "failed");
+      }
+
+      return deployments;
+    },
+    [statusFilter]
+  );
+
   const getPaginatedDeployments = useCallback(
     (projectId: string, deployments: Deployment[]) => {
+      const filteredDeployments = getFilteredDeployments(
+        projectId,
+        deployments
+      );
       const page = currentPage[projectId] || 1;
       const startIndex = (page - 1) * DEPLOYMENTS_PER_PAGE;
-      return deployments.slice(startIndex, startIndex + DEPLOYMENTS_PER_PAGE);
+      return filteredDeployments.slice(
+        startIndex,
+        startIndex + DEPLOYMENTS_PER_PAGE
+      );
     },
-    [currentPage]
+    [currentPage, getFilteredDeployments]
   );
 
   const getTotalPages = useCallback((total: number) => {
     return Math.ceil(total / DEPLOYMENTS_PER_PAGE);
   }, []);
+
+  const handleStatusFilterClick = useCallback(
+    (projectId: string, filter: StatusFilter) => {
+      setStatusFilter((prev) => ({
+        ...prev,
+        [projectId]: filter,
+      }));
+      setCurrentPage((prev) => ({
+        ...prev,
+        [projectId]: 1,
+      }));
+    },
+    []
+  );
 
   const fetchProjectDeployments = useCallback(
     async (
@@ -313,6 +374,11 @@ const Dashboard: React.FC<DashboardProps> = ({
         return newState;
       });
       setDeploymentLoading((prev) => {
+        const newState = { ...prev };
+        delete newState[deleteConfirmProject.$id!];
+        return newState;
+      });
+      setStatusFilter((prev) => {
         const newState = { ...prev };
         delete newState[deleteConfirmProject.$id!];
         return newState;
@@ -965,12 +1031,27 @@ const Dashboard: React.FC<DashboardProps> = ({
                 const isLoadingDeployments =
                   deploymentLoading[project.$id || ""];
                 const allDeployments = deploymentData?.deployments || [];
+                const currentFilter = statusFilter[project.$id || ""] || "all";
+                const filteredDeployments = getFilteredDeployments(
+                  project.$id || "",
+                  allDeployments
+                );
                 const paginatedDeployments = getPaginatedDeployments(
                   project.$id || "",
                   allDeployments
                 );
-                const totalPages = getTotalPages(allDeployments.length);
+                const totalPages = getTotalPages(filteredDeployments.length);
                 const currentProjectPage = currentPage[project.$id || ""] || 1;
+
+                const totalCount = deploymentData?.total || 0;
+                const successCount =
+                  deploymentData?.deployments?.filter(
+                    (d) => d.status === "ready"
+                  ).length || 0;
+                const failedCount =
+                  deploymentData?.deployments?.filter(
+                    (d) => d.status === "failed"
+                  ).length || 0;
 
                 return (
                   <Box
@@ -1044,36 +1125,56 @@ const Dashboard: React.FC<DashboardProps> = ({
                           {[
                             {
                               label: "Total",
-                              value: deploymentData?.total || 0,
+                              value: totalCount,
                               color: darkMode ? "#60a5fa" : "#2563eb",
+                              filter: "all" as StatusFilter,
                             },
                             {
                               label: "Success",
-                              value:
-                                deploymentData?.deployments?.filter(
-                                  (d) => d.status === "ready"
-                                ).length || 0,
+                              value: successCount,
                               color: darkMode ? "#4ade80" : "#16a34a",
+                              filter: "ready" as StatusFilter,
                             },
                             {
                               label: "Failed",
-                              value:
-                                deploymentData?.deployments?.filter(
-                                  (d) => d.status === "failed"
-                                ).length || 0,
+                              value: failedCount,
                               color: darkMode ? "#f87171" : "#dc2626",
+                              filter: "failed" as StatusFilter,
                             },
-                          ].map(({ label, value, color }) => (
-                            <Box key={label}>
+                          ].map(({ label, value, color, filter }) => (
+                            <Box
+                              key={label}
+                              onClick={() =>
+                                handleStatusFilterClick(
+                                  project.$id || "",
+                                  filter
+                                )
+                              }
+                              sx={{
+                                cursor: "pointer",
+                                transition: "all 0.2s",
+                                padding: "4px 8px",
+                                borderRadius: "6px",
+                                opacity: currentFilter === filter ? 1 : 0.4,
+                                "&:hover": {
+                                  opacity: currentFilter === filter ? 1 : 0.6,
+                                },
+                              }}
+                            >
                               <Typography
                                 variant="body1"
-                                sx={{ fontWeight: 600, color }}
+                                sx={{
+                                  fontWeight: 600,
+                                  color,
+                                }}
                               >
                                 {value}
                               </Typography>
                               <Typography
                                 variant="caption"
-                                sx={{ color: darkMode ? "#9ca3af" : "#6b7280" }}
+                                sx={{
+                                  color: darkMode ? "#9ca3af" : "#6b7280",
+                                }}
                               >
                                 {label}
                               </Typography>
@@ -1083,7 +1184,8 @@ const Dashboard: React.FC<DashboardProps> = ({
                       </Box>
                     </Box>
 
-                    {isLoadingDeployments ? (
+                    {isLoadingDeployments &&
+                    !projectDeployments[project.$id || ""] ? (
                       <Box sx={{ p: 3, textAlign: "center" }}>
                         <Typography
                           variant="body1"
@@ -1118,20 +1220,21 @@ const Dashboard: React.FC<DashboardProps> = ({
                                 "Build Size",
                                 "Total Size",
                                 "Created",
+                                "Actions",
                               ].map((header) => (
                                 <TableCell
                                   key={header}
                                   sx={{
                                     color: darkMode ? "#888888" : "#666666",
-                                    fontSize: "13px", // smaller than before
+                                    fontSize: "13px",
                                     fontWeight: 500,
-                                    py: 1, // tighter vertical padding
-                                    px: 1.5, // reduce horizontal gap
+                                    py: 1,
+                                    px: 1.5,
                                     backgroundColor: darkMode
                                       ? "rgba(255,255,255,0.02)"
                                       : "rgba(0,0,0,0.02)",
                                     border: "none",
-                                    whiteSpace: "nowrap", // prevent wrapping
+                                    whiteSpace: "nowrap",
                                   }}
                                 >
                                   {header}
@@ -1146,23 +1249,20 @@ const Dashboard: React.FC<DashboardProps> = ({
                                   sx={{
                                     fontFamily: "monospace",
                                     color: darkMode ? "#FFFFFF" : "#000000",
-                                    fontSize: "12.5px", // slightly smaller
-                                    py: 1,
-                                    px: 1.5,
+                                    fontSize: "12.5px",
+                                    p: 1,
                                     border: "none",
                                     whiteSpace: "nowrap",
                                     overflow: "hidden",
                                     textOverflow: "ellipsis",
-                                    maxWidth: 140, // still truncates long IDs
+                                    maxWidth: 140,
                                   }}
                                   title={deployment.resourceId}
                                 >
                                   {deployment.resourceId}
                                 </TableCell>
 
-                                <TableCell
-                                  sx={{ py: 1, px: 1.5, border: "none" }}
-                                >
+                                <TableCell sx={{ p: 1, border: "none" }}>
                                   <Chip
                                     label={deployment.status}
                                     size="small"
@@ -1182,10 +1282,12 @@ const Dashboard: React.FC<DashboardProps> = ({
                                   sx={{
                                     color: darkMode ? "#FFFFFF" : "#000000",
                                     fontSize: "13px",
-                                    py: 1,
-                                    px: 1.5,
+                                    p: 1,
                                     border: "none",
                                     whiteSpace: "nowrap",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                    maxWidth: 180,
                                   }}
                                 >
                                   {deployment.siteName}
@@ -1195,8 +1297,7 @@ const Dashboard: React.FC<DashboardProps> = ({
                                   sx={{
                                     color: darkMode ? "#888888" : "#666666",
                                     fontSize: "13px",
-                                    py: 1,
-                                    px: 1.5,
+                                    p: 1,
                                     border: "none",
                                   }}
                                 >
@@ -1207,40 +1308,43 @@ const Dashboard: React.FC<DashboardProps> = ({
                                   sx={{
                                     color: darkMode ? "#888888" : "#666666",
                                     fontSize: "13px",
-                                    py: 1,
-                                    px: 1.5,
+                                    p: 1,
                                     border: "none",
                                     whiteSpace: "nowrap",
                                   }}
                                 >
-                                  {(deployment.buildSize / 1024 / 1024).toFixed(
-                                    2
-                                  )}{" "}
-                                  MB
+                                  {deployment.buildSize > 0
+                                    ? `${(
+                                        deployment.buildSize /
+                                        1024 /
+                                        1024
+                                      ).toFixed(2)} MB`
+                                    : "N/A"}
                                 </TableCell>
 
                                 <TableCell
                                   sx={{
                                     color: darkMode ? "#888888" : "#666666",
                                     fontSize: "13px",
-                                    py: 1,
-                                    px: 1.5,
+                                    p: 1,
                                     border: "none",
                                     whiteSpace: "nowrap",
                                   }}
                                 >
-                                  {(deployment.totalSize / 1024 / 1024).toFixed(
-                                    2
-                                  )}{" "}
-                                  MB
+                                  {deployment.totalSize > 0
+                                    ? `${(
+                                        deployment.totalSize /
+                                        1024 /
+                                        1024
+                                      ).toFixed(2)} MB`
+                                    : "N/A"}
                                 </TableCell>
 
                                 <TableCell
                                   sx={{
                                     color: darkMode ? "#888888" : "#666666",
                                     fontSize: "12.5px",
-                                    py: 1,
-                                    px: 1.5,
+                                    p: 1,
                                     border: "none",
                                     whiteSpace: "nowrap",
                                   }}
@@ -1254,6 +1358,67 @@ const Dashboard: React.FC<DashboardProps> = ({
                                     minute: "2-digit",
                                   })}
                                 </TableCell>
+
+                                <TableCell
+                                  align="center"
+                                  sx={{
+                                    p: 1,
+                                    border: "none",
+                                    width: "1%",
+                                  }}
+                                >
+                                  <Tooltip
+                                    title="View in Console"
+                                    arrow
+                                    placement="top"
+                                    slotProps={{
+                                      popper: {
+                                        sx: {
+                                          "& .MuiTooltip-tooltip": {
+                                            bgcolor: darkMode ? "#FFF" : "#000",
+                                            color: darkMode ? "#000" : "#FFF",
+                                            border: `1px solid ${
+                                              darkMode ? "#333" : "#ddd"
+                                            }`,
+                                            borderRadius: "8px",
+                                            fontSize: "12px",
+                                            padding: "4px 8px",
+                                            fontWeight: "500",
+                                          },
+                                          "& .MuiTooltip-arrow": {
+                                            color: darkMode ? "#FFF" : "#000",
+                                          },
+                                        },
+                                      },
+                                    }}
+                                  >
+                                    <IconButton
+                                      size="small"
+                                      onClick={() => {
+                                        const link = getConsoleLink(
+                                          deployment,
+                                          project.projectId,
+                                          project.region
+                                        );
+                                        window.open(link, "_blank");
+                                      }}
+                                      sx={{
+                                        color: darkMode ? "#60a5fa" : "#2563eb",
+                                        p: "4px",
+                                        "&:hover": {
+                                          backgroundColor: darkMode
+                                            ? "rgba(96, 165, 250, 0.1)"
+                                            : "rgba(37, 99, 235, 0.1)",
+                                        },
+                                      }}
+                                    >
+                                      <ExternalLink
+                                        size={15}
+                                        strokeWidth={1.5}
+                                      />
+                                    </IconButton>
+                                  </Tooltip>
+                                </TableCell>
                               </TableRow>
                             ))}
                           </TableBody>
@@ -1261,7 +1426,7 @@ const Dashboard: React.FC<DashboardProps> = ({
                       </TableContainer>
                     ) : null}
 
-                    {allDeployments.length > DEPLOYMENTS_PER_PAGE && (
+                    {filteredDeployments.length > DEPLOYMENTS_PER_PAGE && (
                       <Box
                         sx={{
                           display: "flex",
@@ -1358,9 +1523,30 @@ const Dashboard: React.FC<DashboardProps> = ({
 
                     {!isLoadingDeployments &&
                       deploymentData &&
+                      filteredDeployments.length === 0 &&
+                      allDeployments.length > 0 && (
+                        <Box sx={{ p: 3, textAlign: "center" }}>
+                          <Typography
+                            variant="body2"
+                            sx={{ color: darkMode ? "#888888" : "#666666" }}
+                          >
+                            No{" "}
+                            {currentFilter === "ready"
+                              ? "successful"
+                              : "failed"}{" "}
+                            deployments found
+                          </Typography>
+                        </Box>
+                      )}
+
+                    {!isLoadingDeployments &&
+                      deploymentData &&
                       allDeployments.length === 0 && (
                         <Box sx={{ p: 3, textAlign: "center" }}>
-                          <Typography variant="body2">
+                          <Typography
+                            variant="body2"
+                            sx={{ color: darkMode ? "#888888" : "#666666" }}
+                          >
                             No deployments found
                           </Typography>
                         </Box>

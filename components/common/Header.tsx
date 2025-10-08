@@ -73,8 +73,9 @@ const Header: React.FC<HeaderProps> = ({
       <Typography
         component="span"
         sx={{
-          mx: { xs: 2, sm: 3, md: 4 },
-          fontSize: { xs: "11px", sm: "12px", md: "13px", lg: "14px" },
+          mx: { xs: 1, sm: 2, md: 3 }, // smaller margins on mobile
+          fontSize: { xs: "10px", sm: "12px", md: "13px", lg: "14px" }, // slightly smaller for mobile
+          whiteSpace: "nowrap",
         }}
       >
         🚀{" "}
@@ -94,8 +95,9 @@ const Header: React.FC<HeaderProps> = ({
       <Typography
         component="span"
         sx={{
-          mx: { xs: 2, sm: 3, md: 4 },
-          fontSize: { xs: "11px", sm: "12px", md: "13px", lg: "14px" },
+          mx: { xs: 1, sm: 2, md: 3 },
+          fontSize: { xs: "10px", sm: "12px", md: "13px", lg: "14px" },
+          whiteSpace: "nowrap",
         }}
       >
         ⚡{" "}
@@ -115,8 +117,9 @@ const Header: React.FC<HeaderProps> = ({
       <Typography
         component="span"
         sx={{
-          mx: { xs: 2, sm: 3, md: 4 },
-          fontSize: { xs: "11px", sm: "12px", md: "13px", lg: "14px" },
+          mx: { xs: 1, sm: 2, md: 3 },
+          fontSize: { xs: "10px", sm: "12px", md: "13px", lg: "14px" },
+          whiteSpace: "nowrap",
         }}
       >
         🧩{" "}
@@ -149,12 +152,12 @@ const Header: React.FC<HeaderProps> = ({
       <Box
         sx={{
           width: "100%",
-          backgroundColor: darkMode ? "#000000" : "#FFFFFF",
-          color: darkMode ? "#FFFFFF" : "#000000",
+          backgroundColor: darkMode ? "#000" : "#fff",
+          color: darkMode ? "#fff" : "#000",
           borderBottom: `1px solid ${
             darkMode ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)"
           }`,
-          fontSize: { xs: "11px", sm: "12px", md: "13px", lg: "14px" },
+          fontSize: { xs: "10px", sm: "12px", md: "13px", lg: "14px" },
           overflow: "hidden",
           py: 0.5,
         }}
@@ -176,12 +179,8 @@ const Header: React.FC<HeaderProps> = ({
             setCurrentSpeed(50);
           }}
         >
-          <Box sx={{ whiteSpace: "nowrap", display: "inline-block" }}>
-            {announcements}
-          </Box>
-          <Box sx={{ whiteSpace: "nowrap", display: "inline-block" }}>
-            {announcements}
-          </Box>
+          <Box sx={{ display: "inline-flex" }}>{announcements}</Box>
+          <Box sx={{ display: "inline-flex" }}>{announcements}</Box>
         </motion.div>
       </Box>
 
@@ -250,7 +249,6 @@ const Header: React.FC<HeaderProps> = ({
             </Typography>
           </Stack>
 
-          
           <Stack direction="row" alignItems="center" spacing={0.5}>
             <IconButton
               component="a"
