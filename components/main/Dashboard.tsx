@@ -19,10 +19,6 @@ import {
   IconButton,
   Alert,
   MenuItem,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
 } from "@mui/material";
 import { Plus, Activity, RefreshCw, Trash2, ChevronDown } from "lucide-react";
 import { databases, functions } from "@/lib/appwrite";
@@ -71,6 +67,7 @@ interface DeploymentResponse {
 }
 
 const MAX_PROJECTS = 3;
+const DEPLOYMENTS_PER_PAGE = 5;
 
 const Dashboard: React.FC<DashboardProps> = ({
   darkMode,
@@ -94,11 +91,11 @@ const Dashboard: React.FC<DashboardProps> = ({
     apiKey: "",
     region: "fra",
   });
-
   const [deleting, setDeleting] = useState<string | null>(null);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [deleteConfirmProject, setDeleteConfirmProject] =
     useState<Project | null>(null);
+  const [currentPage, setCurrentPage] = useState<Record<string, number>>({});
 
   const hasReachedLimit = projects.length >= MAX_PROJECTS;
 
@@ -117,12 +114,10 @@ const Dashboard: React.FC<DashboardProps> = ({
     }
   }, [user]);
 
-  // Encode API key
   const encodeApiKey = useCallback((apiKey: string): string => {
     return btoa(apiKey);
   }, []);
 
-  // Reset form data
   const resetForm = useCallback(() => {
     setFormData({
       projectId: "",
@@ -132,7 +127,39 @@ const Dashboard: React.FC<DashboardProps> = ({
     });
   }, [user?.email]);
 
-  // Fetch project deployments
+  const formatDuration = useCallback((seconds: number) => {
+    return seconds > 60
+      ? `${Math.floor(seconds / 60)}m ${seconds % 60}s`
+      : `${seconds}s`;
+  }, []);
+
+  const getStatusColor = useCallback(
+    (status: string) => {
+      switch (status.toLowerCase()) {
+        case "ready":
+          return darkMode ? "#4ade80" : "#16a34a";
+        case "failed":
+          return darkMode ? "#f87171" : "#dc2626";
+        default:
+          return darkMode ? "#fbbf24" : "#d97706";
+      }
+    },
+    [darkMode]
+  );
+
+  const getPaginatedDeployments = useCallback(
+    (projectId: string, deployments: Deployment[]) => {
+      const page = currentPage[projectId] || 1;
+      const startIndex = (page - 1) * DEPLOYMENTS_PER_PAGE;
+      return deployments.slice(startIndex, startIndex + DEPLOYMENTS_PER_PAGE);
+    },
+    [currentPage]
+  );
+
+  const getTotalPages = useCallback((total: number) => {
+    return Math.ceil(total / DEPLOYMENTS_PER_PAGE);
+  }, []);
+
   const fetchProjectDeployments = useCallback(
     async (
       documentId: string,
@@ -194,7 +221,6 @@ const Dashboard: React.FC<DashboardProps> = ({
     [deploymentLoading, projectDeployments, projects]
   );
 
-  // Fetch all projects
   const fetchProjects = useCallback(
     async (showToast = false) => {
       if (!user?.$id) return;
@@ -237,7 +263,6 @@ const Dashboard: React.FC<DashboardProps> = ({
     [user?.$id, projectDeployments, fetchProjectDeployments]
   );
 
-  // Refresh projects and deployments
   const refreshProjects = useCallback(async () => {
     setLoading(true);
     await fetchProjects(true);
@@ -257,7 +282,6 @@ const Dashboard: React.FC<DashboardProps> = ({
     setLoading(false);
   }, [fetchProjects, projects, fetchProjectDeployments]);
 
-  // Delete project
   const handleDeleteClick = useCallback((project: Project) => {
     setDeleteConfirmProject(project);
     setDeleteConfirmOpen(true);
@@ -311,7 +335,25 @@ const Dashboard: React.FC<DashboardProps> = ({
     }
   }, [user?.$id, fetchProjects, projects.length]);
 
-  // Handle form input change
+  useEffect(() => {
+    if (!user?.$id || projects.length === 0) return;
+
+    const interval = setInterval(() => {
+      projects.forEach((project) => {
+        if (project.$id && project.apiKey && project.projectId) {
+          fetchProjectDeployments(
+            project.$id,
+            project.projectId,
+            project.apiKey,
+            true
+          );
+        }
+      });
+    }, 60000);
+
+    return () => clearInterval(interval);
+  }, [user?.$id, projects, fetchProjectDeployments]);
+
   const handleInputChange = useCallback(
     (field: keyof FormData) => (e: React.ChangeEvent<HTMLInputElement>) => {
       setFormData((prev) => ({ ...prev, [field]: e.target.value }));
@@ -319,7 +361,6 @@ const Dashboard: React.FC<DashboardProps> = ({
     []
   );
 
-  // Validate form data
   const validateForm = useCallback((): string => {
     if (!formData.projectId.trim()) return "Project ID is required";
     if (!formData.apiKey.trim()) return "API Key is required";
@@ -338,7 +379,6 @@ const Dashboard: React.FC<DashboardProps> = ({
     return "";
   }, [formData, projects, hasReachedLimit]);
 
-  // Handle form submission
   const handleFormSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
@@ -404,7 +444,6 @@ const Dashboard: React.FC<DashboardProps> = ({
     ]
   );
 
-  // Calculate stats
   const stats = useMemo(() => {
     const totalDeployments = Object.values(projectDeployments).reduce(
       (acc, response) => acc + (response?.total || 0),
@@ -418,29 +457,6 @@ const Dashboard: React.FC<DashboardProps> = ({
     };
   }, [projects, projectDeployments]);
 
-  // Format duration
-  const formatDuration = useCallback((seconds: number) => {
-    return seconds > 60
-      ? `${Math.floor(seconds / 60)}m ${seconds % 60}s`
-      : `${seconds}s`;
-  }, []);
-
-  // Get status color
-  const getStatusColor = useCallback(
-    (status: string) => {
-      switch (status.toLowerCase()) {
-        case "ready":
-          return darkMode ? "#4ade80" : "#16a34a";
-        case "failed":
-          return darkMode ? "#f87171" : "#dc2626";
-        default:
-          return darkMode ? "#fbbf24" : "#d97706";
-      }
-    },
-    [darkMode]
-  );
-
-  // Styles
   const containerStyle = {
     pt: 6,
     backgroundColor: darkMode ? "#000000" : "#FFFFFF",
@@ -787,7 +803,7 @@ const Dashboard: React.FC<DashboardProps> = ({
                     size="small"
                     sx={textFieldStyle}
                     disabled={hasReachedLimit}
-                    helperText="Ensure your API key includes the 'sites.read' scope for proper functionality."
+                    helperText="Ensure your API key includes the 'sites.read' scope."
                     FormHelperTextProps={{
                       sx: {
                         fontSize: "12px",
@@ -944,8 +960,13 @@ const Dashboard: React.FC<DashboardProps> = ({
                 const deploymentData = projectDeployments[project.$id || ""];
                 const isLoadingDeployments =
                   deploymentLoading[project.$id || ""];
-                const recentDeployments =
-                  deploymentData?.deployments?.slice(0, 5) || [];
+                const allDeployments = deploymentData?.deployments || [];
+                const paginatedDeployments = getPaginatedDeployments(
+                  project.$id || "",
+                  allDeployments
+                );
+                const totalPages = getTotalPages(allDeployments.length);
+                const currentProjectPage = currentPage[project.$id || ""] || 1;
 
                 return (
                   <Box
@@ -1058,7 +1079,7 @@ const Dashboard: React.FC<DashboardProps> = ({
                       </Box>
                     </Box>
 
-                    {recentDeployments.length > 0 && (
+                    {paginatedDeployments.length > 0 && (
                       <TableContainer>
                         <Table size="small">
                           <TableHead>
@@ -1085,7 +1106,7 @@ const Dashboard: React.FC<DashboardProps> = ({
                             </TableRow>
                           </TableHead>
                           <TableBody>
-                            {recentDeployments.map((deployment) => (
+                            {paginatedDeployments.map((deployment) => (
                               <TableRow key={deployment.$id}>
                                 <TableCell
                                   sx={{
@@ -1146,9 +1167,89 @@ const Dashboard: React.FC<DashboardProps> = ({
                       </TableContainer>
                     )}
 
+                    {allDeployments.length > DEPLOYMENTS_PER_PAGE && (
+                      <Box
+                        sx={{
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                          gap: 2,
+                          p: 2,
+                          borderTop: "1px solid",
+                          borderColor: darkMode
+                            ? "rgba(255,255,255,0.1)"
+                            : "rgba(0,0,0,0.06)",
+                        }}
+                      >
+                        <Button
+                          size="small"
+                          onClick={() =>
+                            setCurrentPage((prev) => ({
+                              ...prev,
+                              [project.$id || ""]: Math.max(
+                                1,
+                                currentProjectPage - 1
+                              ),
+                            }))
+                          }
+                          disabled={currentProjectPage === 1}
+                          sx={{
+                            ...buttonStyle,
+                            minWidth: "80px",
+                            color: darkMode ? "#FFFFFF" : "#000000",
+                            borderColor: darkMode
+                              ? "rgba(255,255,255,0.2)"
+                              : "rgba(0,0,0,0.2)",
+                            "&.Mui-disabled": {
+                              color: darkMode ? "#666666" : "#999999",
+                            },
+                          }}
+                        >
+                          Previous
+                        </Button>
+
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: darkMode ? "#888888" : "#666666",
+                            fontSize: "13px",
+                          }}
+                        >
+                          Page {currentProjectPage} of {totalPages}
+                        </Typography>
+
+                        <Button
+                          size="small"
+                          onClick={() =>
+                            setCurrentPage((prev) => ({
+                              ...prev,
+                              [project.$id || ""]: Math.min(
+                                totalPages,
+                                currentProjectPage + 1
+                              ),
+                            }))
+                          }
+                          disabled={currentProjectPage === totalPages}
+                          sx={{
+                            ...buttonStyle,
+                            minWidth: "80px",
+                            color: darkMode ? "#FFFFFF" : "#000000",
+                            borderColor: darkMode
+                              ? "rgba(255,255,255,0.2)"
+                              : "rgba(0,0,0,0.2)",
+                            "&.Mui-disabled": {
+                              color: darkMode ? "#666666" : "#999999",
+                            },
+                          }}
+                        >
+                          Next
+                        </Button>
+                      </Box>
+                    )}
+
                     {!isLoadingDeployments &&
                       deploymentData &&
-                      recentDeployments.length === 0 && (
+                      allDeployments.length === 0 && (
                         <Box sx={{ p: 3, textAlign: "center" }}>
                           <Typography variant="body2">
                             No deployments found
