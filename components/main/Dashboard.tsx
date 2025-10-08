@@ -1099,7 +1099,12 @@ const Dashboard: React.FC<DashboardProps> = ({
                       <TableContainer
                         sx={{
                           width: "100%",
-                          overflowX: "auto", // horizontal scroll on small devices
+                          overflowX: "auto",
+                          scrollbarWidth: "none",
+                          msOverflowStyle: "none",
+                          "&::-webkit-scrollbar": {
+                            display: "none",
+                          },
                         }}
                       >
                         <Table size="small">
