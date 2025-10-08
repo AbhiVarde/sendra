@@ -57,6 +57,10 @@ interface Deployment {
   status: string;
   siteName: string;
   buildDuration: number;
+  buildSize: number;
+  totalSize: number;
+  $createdAt: string;
+  type: string;
 }
 
 interface DeploymentResponse {
@@ -1092,29 +1096,42 @@ const Dashboard: React.FC<DashboardProps> = ({
                         </Typography>
                       </Box>
                     ) : paginatedDeployments.length > 0 ? (
-                      <TableContainer>
+                      <TableContainer
+                        sx={{
+                          width: "100%",
+                          overflowX: "auto", // horizontal scroll on small devices
+                        }}
+                      >
                         <Table size="small">
                           <TableHead>
                             <TableRow>
-                              {["ID", "Status", "Site", "Duration"].map(
-                                (header) => (
-                                  <TableCell
-                                    key={header}
-                                    sx={{
-                                      color: darkMode ? "#888888" : "#666666",
-                                      fontSize: "14px",
-                                      fontWeight: 500,
-                                      py: 1.5,
-                                      backgroundColor: darkMode
-                                        ? "rgba(255,255,255,0.02)"
-                                        : "rgba(0,0,0,0.02)",
-                                      border: "none",
-                                    }}
-                                  >
-                                    {header}
-                                  </TableCell>
-                                )
-                              )}
+                              {[
+                                "ID",
+                                "Status",
+                                "Site",
+                                "Duration",
+                                "Build Size",
+                                "Total Size",
+                                "Created",
+                              ].map((header) => (
+                                <TableCell
+                                  key={header}
+                                  sx={{
+                                    color: darkMode ? "#888888" : "#666666",
+                                    fontSize: "13px", // smaller than before
+                                    fontWeight: 500,
+                                    py: 1, // tighter vertical padding
+                                    px: 1.5, // reduce horizontal gap
+                                    backgroundColor: darkMode
+                                      ? "rgba(255,255,255,0.02)"
+                                      : "rgba(0,0,0,0.02)",
+                                    border: "none",
+                                    whiteSpace: "nowrap", // prevent wrapping
+                                  }}
+                                >
+                                  {header}
+                                </TableCell>
+                              ))}
                             </TableRow>
                           </TableHead>
                           <TableBody>
@@ -1124,19 +1141,23 @@ const Dashboard: React.FC<DashboardProps> = ({
                                   sx={{
                                     fontFamily: "monospace",
                                     color: darkMode ? "#FFFFFF" : "#000000",
-                                    fontSize: "13px",
-                                    py: 1.5,
+                                    fontSize: "12.5px", // slightly smaller
+                                    py: 1,
+                                    px: 1.5,
                                     border: "none",
-                                    maxWidth: 160,
                                     whiteSpace: "nowrap",
                                     overflow: "hidden",
                                     textOverflow: "ellipsis",
+                                    maxWidth: 140, // still truncates long IDs
                                   }}
+                                  title={deployment.resourceId}
                                 >
                                   {deployment.resourceId}
                                 </TableCell>
 
-                                <TableCell sx={{ py: 1.5, border: "none" }}>
+                                <TableCell
+                                  sx={{ py: 1, px: 1.5, border: "none" }}
+                                >
                                   <Chip
                                     label={deployment.status}
                                     size="small"
@@ -1145,8 +1166,9 @@ const Dashboard: React.FC<DashboardProps> = ({
                                         deployment.status
                                       )}20`,
                                       color: getStatusColor(deployment.status),
-                                      fontSize: "14px",
+                                      fontSize: "12px",
                                       textTransform: "capitalize",
+                                      height: 20,
                                     }}
                                   />
                                 </TableCell>
@@ -1154,9 +1176,11 @@ const Dashboard: React.FC<DashboardProps> = ({
                                 <TableCell
                                   sx={{
                                     color: darkMode ? "#FFFFFF" : "#000000",
-                                    fontSize: "14px",
-                                    py: 1.5,
+                                    fontSize: "13px",
+                                    py: 1,
+                                    px: 1.5,
                                     border: "none",
+                                    whiteSpace: "nowrap",
                                   }}
                                 >
                                   {deployment.siteName}
@@ -1165,12 +1189,65 @@ const Dashboard: React.FC<DashboardProps> = ({
                                 <TableCell
                                   sx={{
                                     color: darkMode ? "#888888" : "#666666",
-                                    fontSize: "14px",
-                                    py: 1.5,
+                                    fontSize: "13px",
+                                    py: 1,
+                                    px: 1.5,
                                     border: "none",
                                   }}
                                 >
                                   {formatDuration(deployment.buildDuration)}
+                                </TableCell>
+
+                                <TableCell
+                                  sx={{
+                                    color: darkMode ? "#888888" : "#666666",
+                                    fontSize: "13px",
+                                    py: 1,
+                                    px: 1.5,
+                                    border: "none",
+                                    whiteSpace: "nowrap",
+                                  }}
+                                >
+                                  {(deployment.buildSize / 1024 / 1024).toFixed(
+                                    2
+                                  )}{" "}
+                                  MB
+                                </TableCell>
+
+                                <TableCell
+                                  sx={{
+                                    color: darkMode ? "#888888" : "#666666",
+                                    fontSize: "13px",
+                                    py: 1,
+                                    px: 1.5,
+                                    border: "none",
+                                    whiteSpace: "nowrap",
+                                  }}
+                                >
+                                  {(deployment.totalSize / 1024 / 1024).toFixed(
+                                    2
+                                  )}{" "}
+                                  MB
+                                </TableCell>
+
+                                <TableCell
+                                  sx={{
+                                    color: darkMode ? "#888888" : "#666666",
+                                    fontSize: "12.5px",
+                                    py: 1,
+                                    px: 1.5,
+                                    border: "none",
+                                    whiteSpace: "nowrap",
+                                  }}
+                                >
+                                  {new Date(
+                                    deployment.$createdAt
+                                  ).toLocaleDateString("en-US", {
+                                    month: "short",
+                                    day: "numeric",
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  })}
                                 </TableCell>
                               </TableRow>
                             ))}
