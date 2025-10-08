@@ -1079,7 +1079,19 @@ const Dashboard: React.FC<DashboardProps> = ({
                       </Box>
                     </Box>
 
-                    {paginatedDeployments.length > 0 && (
+                    {isLoadingDeployments ? (
+                      <Box sx={{ p: 3, textAlign: "center" }}>
+                        <Typography
+                          variant="body1"
+                          sx={{
+                            color: darkMode ? "#FFFFFF" : "#000000",
+                            fontWeight: 500,
+                          }}
+                        >
+                          Loading deployments...
+                        </Typography>
+                      </Box>
+                    ) : paginatedDeployments.length > 0 ? (
                       <TableContainer>
                         <Table size="small">
                           <TableHead>
@@ -1165,7 +1177,7 @@ const Dashboard: React.FC<DashboardProps> = ({
                           </TableBody>
                         </Table>
                       </TableContainer>
-                    )}
+                    ) : null}
 
                     {allDeployments.length > DEPLOYMENTS_PER_PAGE && (
                       <Box
