@@ -9,6 +9,7 @@ interface HeaderProps {
   setDarkMode: (value: boolean) => void;
   isLoggedIn: boolean;
   onSignOut: () => void;
+  onLogoClick?: () => void;
 }
 
 const Header: React.FC<HeaderProps> = ({
@@ -16,6 +17,7 @@ const Header: React.FC<HeaderProps> = ({
   setDarkMode,
   isLoggedIn,
   onSignOut,
+  onLogoClick,
 }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [currentSpeed, setCurrentSpeed] = useState(50);
@@ -221,7 +223,21 @@ const Header: React.FC<HeaderProps> = ({
               : "0 2px 10px rgba(0,0,0,0.05)",
           }}
         >
-          <Stack direction="row" alignItems="center" spacing={1.2}>
+          <Stack
+            direction="row"
+            alignItems="center"
+            spacing={1.2}
+            onClick={onLogoClick}
+            sx={{
+              cursor: onLogoClick ? "pointer" : "default",
+              "&:hover": onLogoClick
+                ? {
+                    opacity: 0.8,
+                    transition: "opacity 0.2s ease",
+                  }
+                : {},
+            }}
+          >
             <Mail size={20} color={darkMode ? "#fff" : "#000"} />
             <Typography
               variant="h6"
@@ -234,6 +250,7 @@ const Header: React.FC<HeaderProps> = ({
             </Typography>
           </Stack>
 
+          
           <Stack direction="row" alignItems="center" spacing={0.5}>
             <IconButton
               component="a"

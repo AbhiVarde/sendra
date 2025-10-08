@@ -15,6 +15,7 @@ export default function SendraApp() {
   const [darkMode, setDarkMode] = useState<boolean | null>(null);
   const { user, loading, loginWithGitHub, logout, isLoggedIn, initialized } =
     useAuth();
+  const [showForm, setShowForm] = useState(false);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme");
@@ -113,6 +114,7 @@ export default function SendraApp() {
           setDarkMode={setDarkMode}
           isLoggedIn={isLoggedIn}
           onSignOut={handleSignOut}
+          onLogoClick={isLoggedIn ? () => setShowForm(false) : undefined}
         />
         <Box sx={{ flexGrow: 1, pt: 12 }}>
           {!isLoggedIn ? (
@@ -125,7 +127,12 @@ export default function SendraApp() {
               <FeatureSection darkMode={darkMode} />
             </>
           ) : (
-            <Dashboard darkMode={darkMode} user={user} />
+            <Dashboard
+              darkMode={darkMode}
+              user={user}
+              showFormProp={showForm}
+              onToggleForm={setShowForm}
+            />
           )}
         </Box>
         <Footer darkMode={darkMode} />

@@ -18,8 +18,9 @@ import {
   Chip,
   IconButton,
   Alert,
+  MenuItem,
 } from "@mui/material";
-import { Plus, Activity, RefreshCw, Trash2 } from "lucide-react";
+import { Plus, Activity, RefreshCw, Trash2, ChevronDown } from "lucide-react";
 import { databases, functions } from "@/lib/appwrite";
 import { ID, Query } from "appwrite";
 import { toast } from "sonner";
@@ -27,6 +28,8 @@ import { toast } from "sonner";
 interface DashboardProps {
   darkMode: boolean;
   user: any;
+  showFormProp?: boolean;
+  onToggleForm?: (value: boolean) => void;
 }
 
 interface Project {
@@ -64,9 +67,14 @@ interface DeploymentResponse {
 
 const MAX_PROJECTS = 3;
 
-const Dashboard: React.FC<DashboardProps> = ({ darkMode, user }) => {
+const Dashboard: React.FC<DashboardProps> = ({
+  darkMode,
+  user,
+  showFormProp,
+  onToggleForm,
+}) => {
+  const [showForm, setShowForm] = useState(showFormProp ?? false);
   const [projects, setProjects] = useState<Project[]>([]);
-  const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
   const [projectDeployments, setProjectDeployments] = useState<
@@ -84,6 +92,12 @@ const Dashboard: React.FC<DashboardProps> = ({ darkMode, user }) => {
   });
 
   const hasReachedLimit = projects.length >= MAX_PROJECTS;
+
+  useEffect(() => {
+    if (showFormProp !== undefined) {
+      setShowForm(showFormProp);
+    }
+  }, [showFormProp]);
 
   useEffect(() => {
     if (!user) {
@@ -345,7 +359,7 @@ const Dashboard: React.FC<DashboardProps> = ({ darkMode, user }) => {
         );
 
         resetForm();
-        setShowForm(false);
+        onToggleForm?.(false);
       } catch (err: any) {
         console.error("Project creation error:", err);
         if (err.code === 409) {
@@ -608,7 +622,7 @@ const Dashboard: React.FC<DashboardProps> = ({ darkMode, user }) => {
                 <Button
                   variant="outlined"
                   startIcon={<Plus size={14} />}
-                  onClick={() => setShowForm(true)}
+                  onClick={() => onToggleForm?.(true)}
                   disabled={hasReachedLimit}
                   sx={{
                     ...buttonStyle,
@@ -683,7 +697,7 @@ const Dashboard: React.FC<DashboardProps> = ({ darkMode, user }) => {
               <Button
                 variant="contained"
                 startIcon={<Plus size={16} />}
-                onClick={() => setShowForm(true)}
+                onClick={() => onToggleForm?.(true)}
                 sx={{
                   ...buttonStyle,
                   backgroundColor: darkMode ? "#FFFFFF" : "#000000",
@@ -714,14 +728,14 @@ const Dashboard: React.FC<DashboardProps> = ({ darkMode, user }) => {
                   textAlign: "center",
                 }}
               >
-                Connect Project ({projects.length}/{MAX_PROJECTS})
+                Connect Project
               </Typography>
               <Typography
                 variant="body2"
                 sx={{
                   mb: 3,
+                  fontSize: "14px",
                   color: darkMode ? "#888888" : "#666666",
-                  fontSize: "12px",
                   textAlign: "center",
                 }}
               >
@@ -753,13 +767,11 @@ const Dashboard: React.FC<DashboardProps> = ({ darkMode, user }) => {
                     helperText="Ensure your API key includes the 'sites.read' scope for proper functionality."
                     FormHelperTextProps={{
                       sx: {
-                        fontSize: "11px",
+                        fontSize: "12px",
                         color: darkMode ? "#666666" : "#888888",
                       },
                     }}
                   />
-
-                  {/* ADD THIS REGION SELECT FIELD */}
                   <TextField
                     select
                     value={formData.region}
@@ -770,29 +782,63 @@ const Dashboard: React.FC<DashboardProps> = ({ darkMode, user }) => {
                     sx={{
                       ...textFieldStyle,
                       "& .MuiSelect-select": {
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
                         color: darkMode ? "#FFFFFF" : "#000000",
                         fontSize: "14px",
                         padding: "10px 12px",
                       },
                     }}
                     SelectProps={{
-                      native: true,
+                      IconComponent: (props) => (
+                        <ChevronDown
+                          {...props}
+                          size={18}
+                          style={{
+                            color: darkMode ? "#FFFFFF" : "#000000",
+                            pointerEvents: "none",
+                          }}
+                        />
+                      ),
+                      MenuProps: {
+                        PaperProps: {
+                          sx: {
+                            mt: 0.5,
+                            borderRadius: "12px",
+                            boxShadow: "none",
+                            border: darkMode
+                              ? "1px solid rgba(255,255,255,0.1)"
+                              : "1px solid rgba(0,0,0,0.1)",
+                            bgcolor: darkMode ? "#121212" : "#FFFFFF",
+                            "& .MuiMenuItem-root": {
+                              fontSize: "14px",
+                              padding: "10px 12px",
+                              color: darkMode ? "#FFFFFF" : "#000000",
+                              "&:hover": {
+                                bgcolor: darkMode
+                                  ? "rgba(255,255,255,0.08)"
+                                  : "rgba(0,0,0,0.05)",
+                              },
+                            },
+                          },
+                        },
+                      },
                     }}
                     disabled={hasReachedLimit}
                     helperText="Select your Appwrite Cloud region"
                     FormHelperTextProps={{
                       sx: {
-                        fontSize: "11px",
+                        fontSize: "12px",
                         color: darkMode ? "#666666" : "#888888",
                       },
                     }}
                   >
-                    <option value="fra">🇩🇪 Frankfurt (FRA)</option>
-                    <option value="nyc">🇺🇸 New York (NYC)</option>
-                    <option value="syd">🇦🇺 Sydney (SYD)</option>
-                    <option value="sfo">🇺🇸 San Francisco (SFO)</option>
+                    <MenuItem value="fra">🇩🇪 Frankfurt (FRA)</MenuItem>
+                    <MenuItem value="nyc">🇺🇸 New York (NYC)</MenuItem>
+                    <MenuItem value="syd">🇦🇺 Sydney (SYD)</MenuItem>
+                    <MenuItem value="sfo">🇺🇸 San Francisco (SFO)</MenuItem>
                   </TextField>
-
                   <TextField
                     placeholder="Email (optional)"
                     type="email"
@@ -842,7 +888,7 @@ const Dashboard: React.FC<DashboardProps> = ({ darkMode, user }) => {
                       type="button"
                       variant="outlined"
                       onClick={() => {
-                        setShowForm(false);
+                        onToggleForm?.(false);
                         resetForm();
                       }}
                       disabled={loading}
