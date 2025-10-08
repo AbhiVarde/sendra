@@ -19,11 +19,16 @@ import {
   IconButton,
   Alert,
   MenuItem,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from "@mui/material";
 import { Plus, Activity, RefreshCw, Trash2, ChevronDown } from "lucide-react";
 import { databases, functions } from "@/lib/appwrite";
 import { ID, Query } from "appwrite";
 import { toast } from "sonner";
+import DeleteDialog from "../dialogs/DeleteDialog";
 
 interface DashboardProps {
   darkMode: boolean;
@@ -83,13 +88,17 @@ const Dashboard: React.FC<DashboardProps> = ({
   const [deploymentLoading, setDeploymentLoading] = useState<
     Record<string, boolean>
   >({});
-  const [deleting, setDeleting] = useState<string | null>(null);
   const [formData, setFormData] = useState<FormData>({
     projectId: "",
     email: user?.email || "",
     apiKey: "",
     region: "fra",
   });
+
+  const [deleting, setDeleting] = useState<string | null>(null);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [deleteConfirmProject, setDeleteConfirmProject] =
+    useState<Project | null>(null);
 
   const hasReachedLimit = projects.length >= MAX_PROJECTS;
 
@@ -249,37 +258,51 @@ const Dashboard: React.FC<DashboardProps> = ({
   }, [fetchProjects, projects, fetchProjectDeployments]);
 
   // Delete project
-  const handleDeleteProject = useCallback(async (project: Project) => {
-    if (!project?.$id) return;
+  const handleDeleteClick = useCallback((project: Project) => {
+    setDeleteConfirmProject(project);
+    setDeleteConfirmOpen(true);
+  }, []);
 
-    setDeleting(project.$id);
+  const handleDeleteConfirm = useCallback(async () => {
+    if (!deleteConfirmProject?.$id) return;
+
+    setDeleting(deleteConfirmProject.$id);
+    setDeleteConfirmOpen(false);
 
     try {
       await databases.deleteDocument(
         process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
         process.env.NEXT_PUBLIC_APPWRITE_COLLECTION_ID!,
-        project.$id
+        deleteConfirmProject.$id
       );
 
-      setProjects((prev) => prev.filter((p) => p.$id !== project.$id));
+      setProjects((prev) =>
+        prev.filter((p) => p.$id !== deleteConfirmProject.$id)
+      );
       setProjectDeployments((prev) => {
         const newState = { ...prev };
-        delete newState[project.$id!];
+        delete newState[deleteConfirmProject.$id!];
         return newState;
       });
       setDeploymentLoading((prev) => {
         const newState = { ...prev };
-        delete newState[project.$id!];
+        delete newState[deleteConfirmProject.$id!];
         return newState;
       });
 
-      toast.success(`Project "${project.projectId}" deleted`);
+      toast.success(`Project "${deleteConfirmProject.projectId}" deleted`);
     } catch (error: any) {
       console.error("Failed to delete project:", error);
       toast.error("Failed to delete project");
     } finally {
       setDeleting(null);
+      setDeleteConfirmProject(null);
     }
+  }, [deleteConfirmProject]);
+
+  const handleDeleteCancel = useCallback(() => {
+    setDeleteConfirmOpen(false);
+    setDeleteConfirmProject(null);
   }, []);
 
   useEffect(() => {
@@ -985,7 +1008,7 @@ const Dashboard: React.FC<DashboardProps> = ({
                           <IconButton
                             size="small"
                             color="error"
-                            onClick={() => handleDeleteProject(project)}
+                            onClick={() => handleDeleteClick(project)}
                             disabled={deleting === project.$id}
                           >
                             <Trash2 size={16} />
@@ -1127,13 +1150,7 @@ const Dashboard: React.FC<DashboardProps> = ({
                       deploymentData &&
                       recentDeployments.length === 0 && (
                         <Box sx={{ p: 3, textAlign: "center" }}>
-                          <Typography
-                            variant="body2"
-                            sx={{
-                              color: darkMode ? "#888888" : "#666666",
-                              fontSize: "11px",
-                            }}
-                          >
+                          <Typography variant="body2">
                             No deployments found
                           </Typography>
                         </Box>
@@ -1145,6 +1162,13 @@ const Dashboard: React.FC<DashboardProps> = ({
           )}
         </Stack>
       </Container>
+
+      <DeleteDialog
+        open={deleteConfirmOpen}
+        darkMode={darkMode}
+        onCancel={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+      />
 
       <style>
         {`
