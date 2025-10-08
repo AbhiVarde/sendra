@@ -1,34 +1,30 @@
-/* Reset and base styles */
 * {
   box-sizing: border-box;
   padding: 0;
   margin: 0;
 }
 
+:root {
+  --selection-bg: #000000;
+  --selection-color: #ffffff;
+}
+
 html,
 body {
   max-width: 100vw;
   overflow-x: hidden;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 body {
-  background: #FFFFFF;
+  background: #ffffff;
   color: #000000;
   line-height: 1.5;
 }
 
-/* Dark mode styles */
-@media (prefers-color-scheme: dark) {
-  body {
-    background: #000000;
-    color: #FFFFFF;
-  }
-}
-
-/* Links */
 a {
   color: inherit;
   text-decoration: none;
@@ -38,7 +34,6 @@ a:hover {
   text-decoration: none;
 }
 
-/* Buttons */
 button {
   border: none;
   background: none;
@@ -53,13 +48,6 @@ button:focus {
   outline-offset: 2px;
 }
 
-@media (prefers-color-scheme: dark) {
-  button:focus {
-    outline-color: #FFFFFF;
-  }
-}
-
-/* Input elements */
 input,
 textarea {
   font-family: inherit;
@@ -67,7 +55,6 @@ textarea {
   line-height: inherit;
 }
 
-/* Typography scale */
 h1,
 h2,
 h3,
@@ -84,31 +71,22 @@ p {
   line-height: 1.5;
 }
 
-/* Utility classes for consistent spacing */
 .container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 24px;
 }
 
-/* Focus styles for accessibility */
 *:focus {
   outline: 2px solid #000000;
   outline-offset: 2px;
 }
 
-@media (prefers-color-scheme: dark) {
-  *:focus {
-    outline-color: #FFFFFF;
-  }
-}
-
-/* Smooth transitions */
 * {
-  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease,
+    color 0.2s ease;
 }
 
-/* Remove default button styles */
 button,
 input[type="submit"],
 input[type="button"] {
@@ -117,45 +95,30 @@ input[type="button"] {
   appearance: none;
 }
 
-/* Responsive images */
 img {
   max-width: 100%;
   height: auto;
 }
 
-/* Selection colors */
 ::selection {
-  background: #000000;
-  color: #FFFFFF;
+  background-color: var(--selection-bg) !important;
+  color: var(--selection-color) !important;
 }
 
-@media (prefers-color-scheme: dark) {
-  ::selection {
-    background: #FFFFFF;
-    color: #000000;
-  }
+::-moz-selection {
+  background-color: var(--selection-bg) !important;
+  color: var(--selection-color) !important;
 }
 
-/* Scrollbar styles (webkit browsers) */
 ::-webkit-scrollbar {
   width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #FAFAFB;
+  background: #fafafb;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1A1A1A;
+  background: #1a1a1a;
   border-radius: 4px;
-}
-
-@media (prefers-color-scheme: dark) {
-  ::-webkit-scrollbar-track {
-    background: #1A1A1A;
-  }
-
-  ::-webkit-scrollbar-thumb {
-    background: #FAFAFB;
-  }
 }

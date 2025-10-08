@@ -12,9 +12,37 @@ import PulsatingRing from "@/components/common/PulsatingRing";
 import { Toaster } from "sonner";
 
 export default function SendraApp() {
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState<boolean | null>(null);
   const { user, loading, loginWithGitHub, logout, isLoggedIn, initialized } =
     useAuth();
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme) {
+      setDarkMode(savedTheme === "dark");
+    } else {
+      setDarkMode(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (darkMode === null) return;
+    if (darkMode) {
+      document.documentElement.style.setProperty("--selection-bg", "#ffffff");
+      document.documentElement.style.setProperty(
+        "--selection-color",
+        "#000000"
+      );
+      localStorage.setItem("theme", "dark");
+    } else {
+      document.documentElement.style.setProperty("--selection-bg", "#000000");
+      document.documentElement.style.setProperty(
+        "--selection-color",
+        "#ffffff"
+      );
+      localStorage.setItem("theme", "light");
+    }
+  }, [darkMode]);
 
   useEffect(() => {
     console.log("Auth state:", { user, loading, isLoggedIn, initialized });
@@ -24,7 +52,7 @@ export default function SendraApp() {
     try {
       await loginWithGitHub();
     } catch (error) {
-      console.error("Sign in failed:", error);
+      console.error(error);
     }
   };
 
@@ -32,12 +60,11 @@ export default function SendraApp() {
     try {
       await logout();
     } catch (error) {
-      console.error("Sign out failed:", error);
+      console.error(error);
     }
   };
 
-  // Show loading while initializing
-  if (!initialized || loading) {
+  if (darkMode === null || !initialized || loading) {
     return (
       <Box
         sx={{
@@ -45,8 +72,8 @@ export default function SendraApp() {
           alignItems: "center",
           justifyContent: "center",
           minHeight: "100vh",
-          backgroundColor: darkMode ? "#000000" : "#FFFFFF",
-          color: darkMode ? "#FFFFFF" : "#000000",
+          backgroundColor: darkMode !== false ? "#000000" : "#FFFFFF",
+          color: darkMode !== false ? "#FFFFFF" : "#000000",
         }}
       >
         <PulsatingRing />
@@ -56,7 +83,6 @@ export default function SendraApp() {
 
   return (
     <>
-      {/* Sonner Toaster */}
       <Toaster
         theme={darkMode ? "dark" : "light"}
         position="bottom-center"
@@ -73,7 +99,6 @@ export default function SendraApp() {
           },
         }}
       />
-
       <Box
         sx={{
           display: "flex",
@@ -89,7 +114,6 @@ export default function SendraApp() {
           isLoggedIn={isLoggedIn}
           onSignOut={handleSignOut}
         />
-
         <Box sx={{ flexGrow: 1, pt: 12 }}>
           {!isLoggedIn ? (
             <>
@@ -104,7 +128,6 @@ export default function SendraApp() {
             <Dashboard darkMode={darkMode} user={user} />
           )}
         </Box>
-
         <Footer darkMode={darkMode} />
       </Box>
     </>
