@@ -19,7 +19,6 @@ const Footer: React.FC<FooterProps> = ({ darkMode }) => {
       }}
     >
       <Box sx={{ width: "100%", maxWidth: 700, px: { xs: 2, sm: 3 } }}>
-        {/* Custom gradient divider */}
         <Box
           sx={{
             width: "100%",

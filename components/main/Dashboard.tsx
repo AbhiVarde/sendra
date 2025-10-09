@@ -20,6 +20,8 @@ import {
   Alert,
   MenuItem,
   Tooltip,
+  Tabs,
+  Tab,
 } from "@mui/material";
 import {
   Plus,
@@ -63,23 +65,41 @@ interface Deployment {
   $id: string;
   resourceId: string;
   status: string;
-  siteName: string;
+  siteName?: string;
+  functionName?: string;
   buildDuration: number;
   buildSize: number;
   totalSize: number;
   $createdAt: string;
   type: string;
   siteId?: string;
+  functionId?: string;
+}
+
+interface SiteDeploymentsResponse {
+  deployments: Deployment[];
+  total: number;
+  latestDeployment: Deployment | null;
+  sitesCount: number;
+}
+
+interface FunctionDeploymentsResponse {
+  deployments: Deployment[];
+  total: number;
+  latestDeployment: Deployment | null;
+  functionsCount: number;
 }
 
 interface DeploymentResponse {
-  error: string;
+  error?: string;
   success: boolean;
-  deployments: Deployment[];
-  total: number;
+  sites: SiteDeploymentsResponse;
+  functions: FunctionDeploymentsResponse;
   isExpired?: boolean;
 }
+
 type StatusFilter = "all" | "ready" | "failed";
+type DeploymentTab = "sites" | "functions";
 
 const MAX_PROJECTS = 3;
 const DEPLOYMENTS_PER_PAGE = 5;
@@ -94,9 +114,15 @@ const Dashboard: React.FC<DashboardProps> = ({
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
-  const [projectDeployments, setProjectDeployments] = useState<
-    Record<string, DeploymentResponse>
+
+  // Separate states for site and function deployments
+  const [projectSiteDeployments, setProjectSiteDeployments] = useState<
+    Record<string, SiteDeploymentsResponse>
   >({});
+  const [projectFunctionDeployments, setProjectFunctionDeployments] = useState<
+    Record<string, FunctionDeploymentsResponse>
+  >({});
+
   const [deploymentLoading, setDeploymentLoading] = useState<
     Record<string, boolean>
   >({});
@@ -120,6 +146,13 @@ const Dashboard: React.FC<DashboardProps> = ({
   const [editingApiKey, setEditingApiKey] = useState<string | null>(null);
   const [newApiKey, setNewApiKey] = useState("");
 
+  // Tab state for each project
+  const [activeTab, setActiveTab] = useState<Record<string, DeploymentTab>>({});
+  // Add this near your other state declarations (around line 60-70)
+  const [resourceFilter, setResourceFilter] = useState<Record<string, string>>(
+    {}
+  );
+
   const hasReachedLimit = projects.length >= MAX_PROJECTS;
 
   useEffect(() => {
@@ -131,7 +164,8 @@ const Dashboard: React.FC<DashboardProps> = ({
   useEffect(() => {
     if (!user) {
       setProjects([]);
-      setProjectDeployments({});
+      setProjectSiteDeployments({});
+      setProjectFunctionDeployments({});
       setDeploymentLoading({});
       setInitialLoading(false);
     }
@@ -185,10 +219,23 @@ const Dashboard: React.FC<DashboardProps> = ({
   }, []);
 
   const getConsoleLink = useCallback(
-    (deployment: Deployment, projectId: string, region: string) => {
-      const siteId = deployment.siteId || deployment.resourceId.split("/")[0];
-      const deploymentId = deployment.$id;
-      return `https://cloud.appwrite.io/console/project-${region}-${projectId}/sites/site-${siteId}/deployments/deployment-${deploymentId}`;
+    (
+      deployment: Deployment,
+      projectId: string,
+      region: string,
+      type: DeploymentTab
+    ) => {
+      console.log("Getting console link for deployment:", deployment);
+      if (type === "functions") {
+        const functionId =
+          deployment.functionId || deployment.resourceId.split("/")[0];
+        const deploymentId = deployment.$id;
+        return `https://cloud.appwrite.io/console/project-${region}-${projectId}/functions/function-${functionId}/deployments/deployment-${deploymentId}`;
+      } else {
+        const siteId = deployment.siteId || deployment.resourceId.split("/")[0];
+        const deploymentId = deployment.$id;
+        return `https://cloud.appwrite.io/console/project-${region}-${projectId}/sites/site-${siteId}/deployments/deployment-${deploymentId}`;
+      }
     },
     []
   );
@@ -208,29 +255,43 @@ const Dashboard: React.FC<DashboardProps> = ({
   );
 
   const getFilteredDeployments = useCallback(
-    (projectId: string, deployments: Deployment[]) => {
-      const filter = statusFilter[projectId] || "all";
+    (projectId: string, deployments: Deployment[], tab: DeploymentTab) => {
+      const filterKey = `${projectId}-${tab}`;
+      const filter = statusFilter[filterKey] || "all";
+      const resourceFilterKey = `${projectId}-${tab}`;
+      const selectedResource = resourceFilter[resourceFilterKey] || "all";
 
-      if (filter === "all") {
-        return deployments;
-      } else if (filter === "ready") {
-        return deployments.filter((d) => d.status === "ready");
+      let filtered = deployments;
+
+      // Filter by status
+      if (filter === "ready") {
+        filtered = filtered.filter((d) => d.status === "ready");
       } else if (filter === "failed") {
-        return deployments.filter((d) => d.status === "failed");
+        filtered = filtered.filter((d) => d.status === "failed");
       }
 
-      return deployments;
+      // Filter by resource
+      if (selectedResource !== "all") {
+        filtered = filtered.filter((d) => {
+          const resourceName = tab === "sites" ? d.siteName : d.functionName;
+          return resourceName === selectedResource;
+        });
+      }
+
+      return filtered;
     },
-    [statusFilter]
+    [statusFilter, resourceFilter]
   );
 
   const getPaginatedDeployments = useCallback(
-    (projectId: string, deployments: Deployment[]) => {
+    (projectId: string, deployments: Deployment[], tab: DeploymentTab) => {
       const filteredDeployments = getFilteredDeployments(
         projectId,
-        deployments
+        deployments,
+        tab
       );
-      const page = currentPage[projectId] || 1;
+      const pageKey = `${projectId}-${tab}`;
+      const page = currentPage[pageKey] || 1;
       const startIndex = (page - 1) * DEPLOYMENTS_PER_PAGE;
       return filteredDeployments.slice(
         startIndex,
@@ -245,18 +306,30 @@ const Dashboard: React.FC<DashboardProps> = ({
   }, []);
 
   const handleStatusFilterClick = useCallback(
-    (projectId: string, filter: StatusFilter) => {
+    (projectId: string, filter: StatusFilter, tab: DeploymentTab) => {
+      const filterKey = `${projectId}-${tab}`;
       setStatusFilter((prev) => ({
         ...prev,
-        [projectId]: filter,
+        [filterKey]: filter,
       }));
       setCurrentPage((prev) => ({
         ...prev,
-        [projectId]: 1,
+        [filterKey]: 1,
       }));
     },
     []
   );
+
+  const handleTabChange = useCallback(
+    (projectId: string, newTab: DeploymentTab) => {
+      setActiveTab((prev) => ({
+        ...prev,
+        [projectId]: newTab,
+      }));
+    },
+    []
+  );
+
   const fetchProjectDeployments = useCallback(
     async (
       documentId: string,
@@ -266,7 +339,9 @@ const Dashboard: React.FC<DashboardProps> = ({
     ) => {
       if (
         !forceRefresh &&
-        (deploymentLoading[documentId] || projectDeployments[documentId])
+        (deploymentLoading[documentId] ||
+          (projectSiteDeployments[documentId] &&
+            projectFunctionDeployments[documentId]))
       ) {
         return;
       }
@@ -285,23 +360,39 @@ const Dashboard: React.FC<DashboardProps> = ({
         const response: DeploymentResponse = JSON.parse(result.responseBody);
 
         if (response.success) {
-          setProjectDeployments((prev) => ({
+          // Store site deployments
+          setProjectSiteDeployments((prev) => ({
             ...prev,
-            [documentId]: response,
+            [documentId]: response.sites,
           }));
 
+          // Store function deployments
+          setProjectFunctionDeployments((prev) => ({
+            ...prev,
+            [documentId]: response.functions,
+          }));
+
+          // Update total deployment count (sites + functions)
+          const totalDeployments =
+            response.sites.total + response.functions.total;
           const currentProject = projects.find((p) => p.$id === documentId);
-          if (currentProject && currentProject.deployments !== response.total) {
+
+          if (
+            currentProject &&
+            currentProject.deployments !== totalDeployments
+          ) {
             await databases.updateDocument(
               process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
               process.env.NEXT_PUBLIC_APPWRITE_COLLECTION_ID!,
               documentId,
-              { deployments: response.total }
+              { deployments: totalDeployments }
             );
 
             setProjects((prev) =>
               prev.map((p) =>
-                p.$id === documentId ? { ...p, deployments: response.total } : p
+                p.$id === documentId
+                  ? { ...p, deployments: totalDeployments }
+                  : p
               )
             );
           }
@@ -340,7 +431,12 @@ const Dashboard: React.FC<DashboardProps> = ({
         setDeploymentLoading((prev) => ({ ...prev, [documentId]: false }));
       }
     },
-    [deploymentLoading, projectDeployments, projects]
+    [
+      deploymentLoading,
+      projectSiteDeployments,
+      projectFunctionDeployments,
+      projects,
+    ]
   );
 
   const fetchProjects = useCallback(
@@ -362,7 +458,8 @@ const Dashboard: React.FC<DashboardProps> = ({
             project.$id &&
             project.apiKey &&
             project.projectId &&
-            !projectDeployments[project.$id]
+            !projectSiteDeployments[project.$id] &&
+            !projectFunctionDeployments[project.$id]
           ) {
             fetchProjectDeployments(
               project.$id,
@@ -382,7 +479,12 @@ const Dashboard: React.FC<DashboardProps> = ({
         setInitialLoading(false);
       }
     },
-    [user?.$id, projectDeployments, fetchProjectDeployments]
+    [
+      user?.$id,
+      projectSiteDeployments,
+      projectFunctionDeployments,
+      fetchProjectDeployments,
+    ]
   );
 
   const refreshProjects = useCallback(async () => {
@@ -425,7 +527,12 @@ const Dashboard: React.FC<DashboardProps> = ({
       setProjects((prev) =>
         prev.filter((p) => p.$id !== deleteConfirmProject.$id)
       );
-      setProjectDeployments((prev) => {
+      setProjectSiteDeployments((prev) => {
+        const newState = { ...prev };
+        delete newState[deleteConfirmProject.$id!];
+        return newState;
+      });
+      setProjectFunctionDeployments((prev) => {
         const newState = { ...prev };
         delete newState[deleteConfirmProject.$id!];
         return newState;
@@ -437,7 +544,8 @@ const Dashboard: React.FC<DashboardProps> = ({
       });
       setStatusFilter((prev) => {
         const newState = { ...prev };
-        delete newState[deleteConfirmProject.$id!];
+        delete newState[`${deleteConfirmProject.$id!}-sites`];
+        delete newState[`${deleteConfirmProject.$id!}-functions`];
         return newState;
       });
 
@@ -504,6 +612,19 @@ const Dashboard: React.FC<DashboardProps> = ({
       }
     },
     [newApiKey, encodeApiKey, fetchProjectDeployments]
+  );
+
+  // Add this with your other helper functions (around line 140-150)
+  const getUniqueResources = useCallback(
+    (deployments: Deployment[], tab: DeploymentTab) => {
+      const resources = new Set<string>();
+      deployments.forEach((d) => {
+        const name = tab === "sites" ? d.siteName : d.functionName;
+        if (name) resources.add(name);
+      });
+      return Array.from(resources).sort();
+    },
+    []
   );
 
   useEffect(() => {
@@ -622,17 +743,20 @@ const Dashboard: React.FC<DashboardProps> = ({
   );
 
   const stats = useMemo(() => {
-    const totalDeployments = Object.values(projectDeployments).reduce(
+    const totalSiteDeployments = Object.values(projectSiteDeployments).reduce(
       (acc, response) => acc + (response?.total || 0),
       0
     );
+    const totalFunctionDeployments = Object.values(
+      projectFunctionDeployments
+    ).reduce((acc, response) => acc + (response?.total || 0), 0);
 
     return {
       projects: projects.length,
-      deployments: totalDeployments,
+      deployments: totalSiteDeployments + totalFunctionDeployments,
       active: projects.filter((p) => p.isActive).length,
     };
-  }, [projects, projectDeployments]);
+  }, [projects, projectSiteDeployments, projectFunctionDeployments]);
 
   const containerStyle = {
     pt: 6,
@@ -932,8 +1056,20 @@ const Dashboard: React.FC<DashboardProps> = ({
             </Box>
           )}
 
+          {/* FORM SECTION */}
           {showForm && (
-            <Box sx={{ ...cardStyle, p: 4 }}>
+            <Box
+              sx={{
+                p: 2,
+                backgroundColor: darkMode ? "#000000" : "#FFFFFF",
+                border: "1px solid",
+                borderColor: darkMode
+                  ? "rgba(255,255,255,0.1)"
+                  : "rgba(0,0,0,0.06)",
+                borderRadius: 4,
+                padding: 4,
+              }}
+            >
               <Typography
                 variant="h6"
                 sx={{
@@ -980,7 +1116,7 @@ const Dashboard: React.FC<DashboardProps> = ({
                     size="small"
                     sx={textFieldStyle}
                     disabled={hasReachedLimit}
-                    helperText="Ensure your API key includes the 'sites.read' scope."
+                    helperText="Ensure your API key includes 'sites.read' and 'functions.read' scopes."
                     FormHelperTextProps={{
                       sx: {
                         fontSize: "12px",
@@ -1131,39 +1267,81 @@ const Dashboard: React.FC<DashboardProps> = ({
             </Box>
           )}
 
+          {/* PROJECTS LIST */}
           {projects.length > 0 && (
             <Stack spacing={2}>
               {projects.map((project) => {
-                const deploymentData = projectDeployments[project.$id || ""];
+                const currentTab = activeTab[project.$id || ""] || "sites";
+                const siteData = projectSiteDeployments[project.$id || ""];
+                const functionData =
+                  projectFunctionDeployments[project.$id || ""];
                 const isLoadingDeployments =
                   deploymentLoading[project.$id || ""];
-                const allDeployments = deploymentData?.deployments || [];
-                const currentFilter = statusFilter[project.$id || ""] || "all";
+
+                const allSiteDeployments = siteData?.deployments || [];
+                const allFunctionDeployments = functionData?.deployments || [];
+
+                const currentDeployments =
+                  currentTab === "sites"
+                    ? allSiteDeployments
+                    : allFunctionDeployments;
+                const currentFilter =
+                  statusFilter[`${project.$id}-${currentTab}`] || "all";
                 const filteredDeployments = getFilteredDeployments(
                   project.$id || "",
-                  allDeployments
+                  currentDeployments,
+                  currentTab
                 );
                 const paginatedDeployments = getPaginatedDeployments(
                   project.$id || "",
-                  allDeployments
+                  currentDeployments,
+                  currentTab
                 );
                 const totalPages = getTotalPages(filteredDeployments.length);
-                const currentProjectPage = currentPage[project.$id || ""] || 1;
+                const pageKey = `${project.$id}-${currentTab}`;
+                const currentProjectPage = currentPage[pageKey] || 1;
 
-                const totalCount = deploymentData?.total || 0;
-                const successCount =
-                  deploymentData?.deployments?.filter(
-                    (d) => d.status === "ready"
-                  ).length || 0;
-                const failedCount =
-                  deploymentData?.deployments?.filter(
+                const siteTotalCount = siteData?.total || 0;
+                const siteSuccessCount =
+                  siteData?.deployments?.filter((d) => d.status === "ready")
+                    .length || 0;
+                const siteFailedCount =
+                  siteData?.deployments?.filter((d) => d.status === "failed")
+                    .length || 0;
+
+                const functionTotalCount = functionData?.total || 0;
+                const functionSuccessCount =
+                  functionData?.deployments?.filter((d) => d.status === "ready")
+                    .length || 0;
+                const functionFailedCount =
+                  functionData?.deployments?.filter(
                     (d) => d.status === "failed"
                   ).length || 0;
+
+                const totalCount =
+                  currentTab === "sites" ? siteTotalCount : functionTotalCount;
+                const successCount =
+                  currentTab === "sites"
+                    ? siteSuccessCount
+                    : functionSuccessCount;
+                const failedCount =
+                  currentTab === "sites"
+                    ? siteFailedCount
+                    : functionFailedCount;
 
                 return (
                   <Box
                     key={project.$id}
-                    sx={{ ...cardStyle, p: 0, overflow: "hidden" }}
+                    sx={{
+                      p: 0,
+                      backgroundColor: darkMode ? "#000000" : "#FFFFFF",
+                      border: "1px solid",
+                      borderColor: darkMode
+                        ? "rgba(255,255,255,0.1)"
+                        : "rgba(0,0,0,0.06)",
+                      borderRadius: 4,
+                      overflow: "hidden",
+                    }}
                   >
                     <Box sx={{ p: 2 }}>
                       <Box
@@ -1228,110 +1406,6 @@ const Dashboard: React.FC<DashboardProps> = ({
                           </IconButton>
                         </Box>
 
-                        {/* Update API Key UI */}
-                        {expiredProjects.has(project.$id || "") && (
-                          <Box
-                            sx={{
-                              p: 2,
-                              backgroundColor: darkMode
-                                ? "rgba(251, 191, 36, 0.1)"
-                                : "rgba(217, 119, 6, 0.1)",
-                              borderBottom: "1px solid",
-                              borderColor: darkMode
-                                ? "rgba(255,255,255,0.1)"
-                                : "rgba(0,0,0,0.06)",
-                            }}
-                          >
-                            <Typography
-                              variant="body2"
-                              sx={{
-                                color: darkMode ? "#fbbf24" : "#d97706",
-                                mb: 1,
-                                fontSize: "13px",
-                                fontWeight: 500,
-                              }}
-                            >
-                              ⚠️ API key expired or invalid. Update to continue
-                              monitoring.
-                            </Typography>
-
-                            {editingApiKey === project.$id ? (
-                              <Stack direction="row" spacing={1}>
-                                <TextField
-                                  type="password"
-                                  placeholder="Enter new API key"
-                                  value={newApiKey}
-                                  onChange={(e) => setNewApiKey(e.target.value)}
-                                  size="small"
-                                  fullWidth
-                                  sx={textFieldStyle}
-                                />
-                                <Button
-                                  size="small"
-                                  onClick={() =>
-                                    handleUpdateApiKey(
-                                      project.projectId,
-                                      project.$id!
-                                    )
-                                  }
-                                  disabled={loading}
-                                  sx={{
-                                    ...buttonStyle,
-                                    backgroundColor: darkMode
-                                      ? "#FFFFFF"
-                                      : "#000000",
-                                    color: darkMode ? "#000000" : "#FFFFFF",
-                                    "&:hover": {
-                                      backgroundColor: darkMode
-                                        ? "#f5f5f5"
-                                        : "#1a1a1a",
-                                    },
-                                  }}
-                                >
-                                  Save
-                                </Button>
-                                <Button
-                                  size="small"
-                                  variant="outlined"
-                                  onClick={() => {
-                                    setEditingApiKey(null);
-                                    setNewApiKey("");
-                                  }}
-                                  sx={{
-                                    ...buttonStyle,
-                                    borderColor: darkMode
-                                      ? "rgba(255,255,255,0.2)"
-                                      : "rgba(0,0,0,0.2)",
-                                    color: darkMode ? "#FFFFFF" : "#000000",
-                                  }}
-                                >
-                                  Cancel
-                                </Button>
-                              </Stack>
-                            ) : (
-                              <Button
-                                size="small"
-                                variant="outlined"
-                                onClick={() =>
-                                  setEditingApiKey(project.$id || "")
-                                }
-                                sx={{
-                                  ...buttonStyle,
-                                  borderColor: darkMode ? "#fbbf24" : "#d97706",
-                                  color: darkMode ? "#fbbf24" : "#d97706",
-                                  "&:hover": {
-                                    borderColor: darkMode
-                                      ? "#fbbf24"
-                                      : "#d97706",
-                                  },
-                                }}
-                              >
-                                Update API Key
-                              </Button>
-                            )}
-                          </Box>
-                        )}
-
                         <Box sx={{ display: "flex", gap: 3 }}>
                           {[
                             {
@@ -1358,7 +1432,8 @@ const Dashboard: React.FC<DashboardProps> = ({
                               onClick={() =>
                                 handleStatusFilterClick(
                                   project.$id || "",
-                                  filter
+                                  filter,
+                                  currentTab
                                 )
                               }
                               sx={{
@@ -1395,8 +1470,270 @@ const Dashboard: React.FC<DashboardProps> = ({
                       </Box>
                     </Box>
 
-                    {isLoadingDeployments &&
-                    !projectDeployments[project.$id || ""] ? (
+                    {/* API Key Expired Warning */}
+                    {expiredProjects.has(project.$id || "") && (
+                      <Box
+                        sx={{
+                          p: 2,
+                          backgroundColor: darkMode
+                            ? "rgba(251, 191, 36, 0.1)"
+                            : "rgba(217, 119, 6, 0.1)",
+                          borderBottom: "1px solid",
+                          borderColor: darkMode
+                            ? "rgba(255,255,255,0.1)"
+                            : "rgba(0,0,0,0.06)",
+                        }}
+                      >
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: darkMode ? "#fbbf24" : "#d97706",
+                            mb: 1,
+                            fontSize: "13px",
+                            fontWeight: 500,
+                          }}
+                        >
+                          ⚠️ API key expired or invalid. Update to continue
+                          monitoring.
+                        </Typography>
+
+                        {editingApiKey === project.$id ? (
+                          <Stack direction="row" spacing={1}>
+                            <TextField
+                              type="password"
+                              placeholder="Enter new API key"
+                              value={newApiKey}
+                              onChange={(e) => setNewApiKey(e.target.value)}
+                              size="small"
+                              fullWidth
+                              sx={textFieldStyle}
+                            />
+                            <Button
+                              size="small"
+                              onClick={() =>
+                                handleUpdateApiKey(
+                                  project.projectId,
+                                  project.$id!
+                                )
+                              }
+                              disabled={loading}
+                              sx={{
+                                ...buttonStyle,
+                                backgroundColor: darkMode
+                                  ? "#FFFFFF"
+                                  : "#000000",
+                                color: darkMode ? "#000000" : "#FFFFFF",
+                                "&:hover": {
+                                  backgroundColor: darkMode
+                                    ? "#f5f5f5"
+                                    : "#1a1a1a",
+                                },
+                              }}
+                            >
+                              Save
+                            </Button>
+                            <Button
+                              size="small"
+                              variant="outlined"
+                              onClick={() => {
+                                setEditingApiKey(null);
+                                setNewApiKey("");
+                              }}
+                              sx={{
+                                ...buttonStyle,
+                                borderColor: darkMode
+                                  ? "rgba(255,255,255,0.2)"
+                                  : "rgba(0,0,0,0.2)",
+                                color: darkMode ? "#FFFFFF" : "#000000",
+                              }}
+                            >
+                              Cancel
+                            </Button>
+                          </Stack>
+                        ) : (
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            onClick={() => setEditingApiKey(project.$id || "")}
+                            sx={{
+                              ...buttonStyle,
+                              borderColor: darkMode ? "#fbbf24" : "#d97706",
+                              color: darkMode ? "#fbbf24" : "#d97706",
+                              "&:hover": {
+                                borderColor: darkMode ? "#fbbf24" : "#d97706",
+                              },
+                            }}
+                          >
+                            Update API Key
+                          </Button>
+                        )}
+                      </Box>
+                    )}
+
+                    {/* TABS AND FILTER */}
+                    <Box
+                      sx={{
+                        borderBottom: 1,
+                        borderColor: darkMode
+                          ? "rgba(255,255,255,0.1)"
+                          : "rgba(0,0,0,0.06)",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        px: 2,
+                        flexWrap: "wrap",
+                        gap: 1,
+                      }}
+                    >
+                      <Tabs
+                        value={currentTab}
+                        onChange={(e, newValue) => {
+                          handleTabChange(project.$id || "", newValue);
+                          const filterKey = `${project.$id}-${newValue}`;
+                          setResourceFilter((prev) => ({
+                            ...prev,
+                            [filterKey]: "all",
+                          }));
+                        }}
+                        sx={{
+                          minHeight: "40px",
+                          "& .MuiTabs-indicator": {
+                            backgroundColor: darkMode ? "#FFFFFF" : "#000000",
+                          },
+                          "& .MuiTabs-flexContainer": {
+                            flexWrap: "wrap",
+                          },
+                        }}
+                        TabIndicatorProps={{
+                          style: { transition: "none" },
+                        }}
+                      >
+                        <Tab
+                          disableRipple
+                          label={`Sites (${siteTotalCount})`}
+                          value="sites"
+                          sx={{
+                            minHeight: "40px",
+                            textTransform: "none",
+                            fontSize: { xs: "12px", sm: "13px" },
+                            fontWeight: 500,
+                            color: darkMode ? "#888888" : "#666666",
+                            "&.Mui-selected": {
+                              color: darkMode ? "#FFFFFF" : "#000000",
+                            },
+                            "&:focus": {
+                              outline: "none",
+                            },
+                          }}
+                        />
+                        <Tab
+                          disableRipple
+                          label={`Functions (${functionTotalCount})`}
+                          value="functions"
+                          sx={{
+                            minHeight: "40px",
+                            textTransform: "none",
+                            fontSize: { xs: "12px", sm: "13px" },
+                            fontWeight: 500,
+                            color: darkMode ? "#888888" : "#666666",
+                            "&.Mui-selected": {
+                              color: darkMode ? "#FFFFFF" : "#000000",
+                            },
+                            "&:focus": {
+                              outline: "none",
+                            },
+                          }}
+                        />
+                      </Tabs>
+
+                      <TextField
+                        select
+                        size="small"
+                        value={
+                          resourceFilter[`${project.$id}-${currentTab}`] ||
+                          "all"
+                        }
+                        onChange={(e) => {
+                          const filterKey = `${project.$id}-${currentTab}`;
+                          // Update filter state
+                          setResourceFilter((prev) => ({
+                            ...prev,
+                            [filterKey]: e.target.value,
+                          }));
+                          // Reset pagination for the current tab
+                          setCurrentPage((prev) => ({
+                            ...prev,
+                            [filterKey]: 1,
+                          }));
+                        }}
+                        sx={{
+                          ...textFieldStyle,
+                          minWidth: { xs: "100%", sm: 180 },
+                          mb: { xs: 1, sm: 0.5 },
+                          "& .MuiSelect-select": {
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "8px",
+                            color: darkMode ? "#FFFFFF" : "#000000",
+                            fontSize: "13px",
+                            padding: "6px 12px",
+                            transition: "all 0.2s ease", // smooth hover/focus effect
+                          },
+                        }}
+                        SelectProps={{
+                          IconComponent: (props) => (
+                            <ChevronDown
+                              {...props}
+                              size={16}
+                              style={{
+                                color: darkMode ? "#FFFFFF" : "#000000",
+                                pointerEvents: "none",
+                              }}
+                            />
+                          ),
+                          MenuProps: {
+                            PaperProps: {
+                              sx: {
+                                mt: 0.5,
+                                borderRadius: "12px",
+                                boxShadow: "0 4px 10px rgba(0,0,0,0.05)", // smoother shadow
+                                border: darkMode
+                                  ? "1px solid rgba(255,255,255,0.1)"
+                                  : "1px solid rgba(0,0,0,0.1)",
+                                bgcolor: darkMode ? "#111111" : "#FFFFFF",
+                                maxHeight: 300,
+                                overflowY: "auto", // prevent lag with many items
+                                "& .MuiMenuItem-root": {
+                                  fontSize: "13px",
+                                  padding: "8px 12px",
+                                  color: darkMode ? "#FFFFFF" : "#000000",
+                                  transition: "background-color 0.2s ease", // smoother hover
+                                  "&:hover": {
+                                    bgcolor: darkMode
+                                      ? "rgba(255,255,255,0.08)"
+                                      : "rgba(0,0,0,0.05)",
+                                  },
+                                },
+                              },
+                            },
+                          },
+                        }}
+                      >
+                        <MenuItem value="all">
+                          All {currentTab === "sites" ? "Sites" : "Functions"}
+                        </MenuItem>
+                        {getUniqueResources(currentDeployments, currentTab).map(
+                          (resource) => (
+                            <MenuItem key={resource} value={resource}>
+                              {resource}
+                            </MenuItem>
+                          )
+                        )}
+                      </TextField>
+                    </Box>
+
+                    {/* DEPLOYMENTS TABLE */}
+                    {isLoadingDeployments && !siteData && !functionData ? (
                       <Box sx={{ p: 3, textAlign: "center" }}>
                         <Typography
                           variant="body1"
@@ -1426,7 +1763,7 @@ const Dashboard: React.FC<DashboardProps> = ({
                               {[
                                 "ID",
                                 "Status",
-                                "Site",
+                                currentTab === "sites" ? "Site" : "Function",
                                 "Duration",
                                 "Build Size",
                                 "Total Size",
@@ -1501,7 +1838,9 @@ const Dashboard: React.FC<DashboardProps> = ({
                                     maxWidth: 180,
                                   }}
                                 >
-                                  {deployment.siteName}
+                                  {currentTab === "sites"
+                                    ? deployment.siteName
+                                    : deployment.functionName}
                                 </TableCell>
 
                                 <TableCell
@@ -1572,11 +1911,7 @@ const Dashboard: React.FC<DashboardProps> = ({
 
                                 <TableCell
                                   align="center"
-                                  sx={{
-                                    p: 1,
-                                    border: "none",
-                                    width: "1%",
-                                  }}
+                                  sx={{ p: 1, border: "none", width: "1%" }}
                                 >
                                   <Tooltip
                                     title="View in Console"
@@ -1609,7 +1944,8 @@ const Dashboard: React.FC<DashboardProps> = ({
                                         const link = getConsoleLink(
                                           deployment,
                                           project.projectId,
-                                          project.region
+                                          project.region,
+                                          currentTab
                                         );
                                         window.open(link, "_blank");
                                       }}
@@ -1637,6 +1973,7 @@ const Dashboard: React.FC<DashboardProps> = ({
                       </TableContainer>
                     ) : null}
 
+                    {/* PAGINATION */}
                     {filteredDeployments.length > DEPLOYMENTS_PER_PAGE && (
                       <Box
                         sx={{
@@ -1656,10 +1993,7 @@ const Dashboard: React.FC<DashboardProps> = ({
                           onClick={() =>
                             setCurrentPage((prev) => ({
                               ...prev,
-                              [project.$id || ""]: Math.max(
-                                1,
-                                currentProjectPage - 1
-                              ),
+                              [pageKey]: Math.max(1, currentProjectPage - 1),
                             }))
                           }
                           disabled={currentProjectPage === 1}
@@ -1672,14 +2006,6 @@ const Dashboard: React.FC<DashboardProps> = ({
                               : "rgba(0,0,0,0.2)",
                             "&.Mui-disabled": {
                               color: darkMode ? "#666666" : "#999999",
-                            },
-                            "&:hover, &:focus, &:active": {
-                              outline: "none",
-                              boxShadow: "none",
-                              borderColor: darkMode
-                                ? "rgba(255,255,255,0.2)"
-                                : "rgba(0,0,0,0.2)",
-                              backgroundColor: "transparent",
                             },
                           }}
                         >
@@ -1700,7 +2026,7 @@ const Dashboard: React.FC<DashboardProps> = ({
                           onClick={() =>
                             setCurrentPage((prev) => ({
                               ...prev,
-                              [project.$id || ""]: Math.min(
+                              [pageKey]: Math.min(
                                 totalPages,
                                 currentProjectPage + 1
                               ),
@@ -1717,14 +2043,6 @@ const Dashboard: React.FC<DashboardProps> = ({
                             "&.Mui-disabled": {
                               color: darkMode ? "#666666" : "#999999",
                             },
-                            "&:hover, &:focus, &:active": {
-                              outline: "none",
-                              boxShadow: "none",
-                              borderColor: darkMode
-                                ? "rgba(255,255,255,0.2)"
-                                : "rgba(0,0,0,0.2)",
-                              backgroundColor: "transparent",
-                            },
                           }}
                         >
                           Next
@@ -1732,10 +2050,11 @@ const Dashboard: React.FC<DashboardProps> = ({
                       </Box>
                     )}
 
+                    {/* NO DEPLOYMENTS MESSAGES */}
                     {!isLoadingDeployments &&
-                      deploymentData &&
+                      (currentTab === "sites" ? siteData : functionData) &&
                       filteredDeployments.length === 0 &&
-                      allDeployments.length > 0 && (
+                      currentDeployments.length > 0 && (
                         <Box sx={{ p: 3, textAlign: "center" }}>
                           <Typography
                             variant="body2"
@@ -1751,14 +2070,15 @@ const Dashboard: React.FC<DashboardProps> = ({
                       )}
 
                     {!isLoadingDeployments &&
-                      deploymentData &&
-                      allDeployments.length === 0 && (
+                      (currentTab === "sites" ? siteData : functionData) &&
+                      currentDeployments.length === 0 && (
                         <Box sx={{ p: 3, textAlign: "center" }}>
                           <Typography
                             variant="body2"
                             sx={{ color: darkMode ? "#888888" : "#666666" }}
                           >
-                            No deployments found
+                            No {currentTab === "sites" ? "site" : "function"}{" "}
+                            deployments found
                           </Typography>
                         </Box>
                       )}

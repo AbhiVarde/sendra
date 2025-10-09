@@ -52,11 +52,6 @@ button {
   transition: all 0.2s ease;
 }
 
-button:focus {
-  outline: 2px solid #000000;
-  outline-offset: 2px;
-}
-
 input,
 textarea {
   font-family: inherit;

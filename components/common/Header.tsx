@@ -148,7 +148,6 @@ const Header: React.FC<HeaderProps> = ({
         zIndex: 1000,
       }}
     >
-      {/* Announcement Bar */}
       <Box
         sx={{
           width: "100%",
@@ -184,7 +183,6 @@ const Header: React.FC<HeaderProps> = ({
         </motion.div>
       </Box>
 
-      {/* Main Header */}
       <Box
         sx={{
           display: "flex",
