@@ -77,8 +77,8 @@ interface DeploymentResponse {
   success: boolean;
   deployments: Deployment[];
   total: number;
+  isExpired?: boolean;
 }
-
 type StatusFilter = "all" | "ready" | "failed";
 
 const MAX_PROJECTS = 3;
@@ -114,6 +114,11 @@ const Dashboard: React.FC<DashboardProps> = ({
   const [statusFilter, setStatusFilter] = useState<
     Record<string, StatusFilter>
   >({});
+  const [expiredProjects, setExpiredProjects] = useState<Set<string>>(
+    new Set()
+  );
+  const [editingApiKey, setEditingApiKey] = useState<string | null>(null);
+  const [newApiKey, setNewApiKey] = useState("");
 
   const hasReachedLimit = projects.length >= MAX_PROJECTS;
 
@@ -132,8 +137,36 @@ const Dashboard: React.FC<DashboardProps> = ({
     }
   }, [user]);
 
-  const encodeApiKey = useCallback((apiKey: string): string => {
-    return btoa(apiKey);
+  const encodeApiKey = useCallback(async (apiKey: string): Promise<string> => {
+    const SECRET_KEY = process.env.NEXT_PUBLIC_ENCRYPTION_SECRET || "";
+
+    const encoder = new TextEncoder();
+    const data = encoder.encode(apiKey);
+
+    const key = await crypto.subtle.importKey(
+      "raw",
+      encoder.encode(SECRET_KEY.substring(0, 32)),
+      { name: "AES-CBC", length: 256 },
+      false,
+      ["encrypt"]
+    );
+
+    const iv = crypto.getRandomValues(new Uint8Array(16));
+
+    const encrypted = await crypto.subtle.encrypt(
+      { name: "AES-CBC", iv },
+      key,
+      data
+    );
+
+    const ivHex = Array.from(iv)
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+    const encryptedHex = Array.from(new Uint8Array(encrypted))
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+
+    return `${ivHex}:${encryptedHex}`;
   }, []);
 
   const resetForm = useCallback(() => {
@@ -224,7 +257,6 @@ const Dashboard: React.FC<DashboardProps> = ({
     },
     []
   );
-
   const fetchProjectDeployments = useCallback(
     async (
       documentId: string,
@@ -241,8 +273,10 @@ const Dashboard: React.FC<DashboardProps> = ({
 
       setDeploymentLoading((prev) => ({ ...prev, [documentId]: true }));
 
+      let result: any = null;
+
       try {
-        const result = await functions.createExecution(
+        result = await functions.createExecution(
           process.env.NEXT_PUBLIC_FETCH_DEPLOYMENTS_FUNCTION_ID!,
           JSON.stringify({ projectId, apiKey: encodedApiKey }),
           false
@@ -272,10 +306,33 @@ const Dashboard: React.FC<DashboardProps> = ({
             );
           }
         } else {
+          if (response.isExpired) {
+            setExpiredProjects((prev) => new Set(prev).add(documentId));
+            if (!forceRefresh) {
+              toast.error(`API key expired. Click update to renew.`);
+            }
+            return;
+          }
           throw new Error(response.error || "Failed to fetch deployments");
         }
       } catch (error: any) {
         console.error(`Failed to fetch deployments:`, error);
+
+        if (result?.responseBody) {
+          try {
+            const errorBody = JSON.parse(result.responseBody);
+            if (errorBody.isExpired) {
+              setExpiredProjects((prev) => new Set(prev).add(documentId));
+              if (!forceRefresh) {
+                toast.error(`API key expired. Click update to renew.`);
+              }
+              return;
+            }
+          } catch (parseError) {
+            // Ignore parse errors
+          }
+        }
+
         if (!forceRefresh) {
           toast.error(`Failed to fetch deployments: ${error.message}`);
         }
@@ -399,6 +456,56 @@ const Dashboard: React.FC<DashboardProps> = ({
     setDeleteConfirmProject(null);
   }, []);
 
+  const handleUpdateApiKey = useCallback(
+    async (projectId: string, documentId: string) => {
+      if (!newApiKey.trim()) {
+        toast.error("Please enter a valid API key");
+        return;
+      }
+
+      setLoading(true);
+      try {
+        const encodedApiKey = await encodeApiKey(newApiKey.trim());
+
+        await databases.updateDocument(
+          process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
+          process.env.NEXT_PUBLIC_APPWRITE_COLLECTION_ID!,
+          documentId,
+          { apiKey: encodedApiKey }
+        );
+
+        setProjects((prev) =>
+          prev.map((p) =>
+            p.$id === documentId ? { ...p, apiKey: encodedApiKey } : p
+          )
+        );
+
+        setExpiredProjects((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(documentId);
+          return newSet;
+        });
+
+        await fetchProjectDeployments(
+          documentId,
+          projectId,
+          encodedApiKey,
+          true
+        );
+
+        setEditingApiKey(null);
+        setNewApiKey("");
+        toast.success("API key updated successfully");
+      } catch (error: any) {
+        console.error("Failed to update API key:", error);
+        toast.error("Failed to update API key");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [newApiKey, encodeApiKey, fetchProjectDeployments]
+  );
+
   useEffect(() => {
     if (user?.$id && projects.length === 0) {
       fetchProjects();
@@ -462,7 +569,7 @@ const Dashboard: React.FC<DashboardProps> = ({
       setLoading(true);
 
       try {
-        const encodedApiKey = encodeApiKey(formData.apiKey.trim());
+        const encodedApiKey = await encodeApiKey(formData.apiKey.trim());
 
         const newProject = await databases.createDocument(
           process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
@@ -1120,6 +1227,110 @@ const Dashboard: React.FC<DashboardProps> = ({
                             <Trash2 size={16} />
                           </IconButton>
                         </Box>
+
+                        {/* Update API Key UI */}
+                        {expiredProjects.has(project.$id || "") && (
+                          <Box
+                            sx={{
+                              p: 2,
+                              backgroundColor: darkMode
+                                ? "rgba(251, 191, 36, 0.1)"
+                                : "rgba(217, 119, 6, 0.1)",
+                              borderBottom: "1px solid",
+                              borderColor: darkMode
+                                ? "rgba(255,255,255,0.1)"
+                                : "rgba(0,0,0,0.06)",
+                            }}
+                          >
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                color: darkMode ? "#fbbf24" : "#d97706",
+                                mb: 1,
+                                fontSize: "13px",
+                                fontWeight: 500,
+                              }}
+                            >
+                              ⚠️ API key expired or invalid. Update to continue
+                              monitoring.
+                            </Typography>
+
+                            {editingApiKey === project.$id ? (
+                              <Stack direction="row" spacing={1}>
+                                <TextField
+                                  type="password"
+                                  placeholder="Enter new API key"
+                                  value={newApiKey}
+                                  onChange={(e) => setNewApiKey(e.target.value)}
+                                  size="small"
+                                  fullWidth
+                                  sx={textFieldStyle}
+                                />
+                                <Button
+                                  size="small"
+                                  onClick={() =>
+                                    handleUpdateApiKey(
+                                      project.projectId,
+                                      project.$id!
+                                    )
+                                  }
+                                  disabled={loading}
+                                  sx={{
+                                    ...buttonStyle,
+                                    backgroundColor: darkMode
+                                      ? "#FFFFFF"
+                                      : "#000000",
+                                    color: darkMode ? "#000000" : "#FFFFFF",
+                                    "&:hover": {
+                                      backgroundColor: darkMode
+                                        ? "#f5f5f5"
+                                        : "#1a1a1a",
+                                    },
+                                  }}
+                                >
+                                  Save
+                                </Button>
+                                <Button
+                                  size="small"
+                                  variant="outlined"
+                                  onClick={() => {
+                                    setEditingApiKey(null);
+                                    setNewApiKey("");
+                                  }}
+                                  sx={{
+                                    ...buttonStyle,
+                                    borderColor: darkMode
+                                      ? "rgba(255,255,255,0.2)"
+                                      : "rgba(0,0,0,0.2)",
+                                    color: darkMode ? "#FFFFFF" : "#000000",
+                                  }}
+                                >
+                                  Cancel
+                                </Button>
+                              </Stack>
+                            ) : (
+                              <Button
+                                size="small"
+                                variant="outlined"
+                                onClick={() =>
+                                  setEditingApiKey(project.$id || "")
+                                }
+                                sx={{
+                                  ...buttonStyle,
+                                  borderColor: darkMode ? "#fbbf24" : "#d97706",
+                                  color: darkMode ? "#fbbf24" : "#d97706",
+                                  "&:hover": {
+                                    borderColor: darkMode
+                                      ? "#fbbf24"
+                                      : "#d97706",
+                                  },
+                                }}
+                              >
+                                Update API Key
+                              </Button>
+                            )}
+                          </Box>
+                        )}
 
                         <Box sx={{ display: "flex", gap: 3 }}>
                           {[
