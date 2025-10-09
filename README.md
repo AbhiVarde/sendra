@@ -73,6 +73,7 @@ NEXT_PUBLIC_APPWRITE_DATABASE_ID=
 NEXT_PUBLIC_APPWRITE_COLLECTION_ID=
 NEXT_PUBLIC_FETCH_DEPLOYMENTS_FUNCTION_ID=
 ```
+
 **Appwrite Collections Setup:**
 
 - **sendra**: `userId`, `projectId`, `deployments`, `functionDeployments`, `trackedDeployments[]`, `trackedFunctionDeployments[]`, `alerts`, `email`, `isActive`, `apiKey`, `region`, `$id`, `$createdAt`, `$updatedAt`
@@ -122,4 +123,3 @@ Sendra is created and maintained by [Abhi Varde](https://www.abhivarde.in/).
 ---
 
 ⭐ **Found this helpful? Give it a star!**
-````
