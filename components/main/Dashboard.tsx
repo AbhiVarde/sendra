@@ -115,23 +115,24 @@ const Dashboard: React.FC<DashboardProps> = ({
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
 
-  // Separate states for site and function deployments
-  const [projectSiteDeployments, setProjectSiteDeployments] = useState<
-    Record<string, SiteDeploymentsResponse>
-  >({});
-  const [projectFunctionDeployments, setProjectFunctionDeployments] = useState<
-    Record<string, FunctionDeploymentsResponse>
-  >({});
-
-  const [deploymentLoading, setDeploymentLoading] = useState<
-    Record<string, boolean>
-  >({});
   const [formData, setFormData] = useState<FormData>({
     projectId: "",
     email: user?.email || "",
     apiKey: "",
     region: "fra",
   });
+  const [editingApiKey, setEditingApiKey] = useState<string | null>(null);
+  const [newApiKey, setNewApiKey] = useState("");
+
+  const [projectSiteDeployments, setProjectSiteDeployments] = useState<
+    Record<string, SiteDeploymentsResponse>
+  >({});
+  const [projectFunctionDeployments, setProjectFunctionDeployments] = useState<
+    Record<string, FunctionDeploymentsResponse>
+  >({});
+  const [deploymentLoading, setDeploymentLoading] = useState<
+    Record<string, boolean>
+  >({});
   const [deleting, setDeleting] = useState<string | null>(null);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [deleteConfirmProject, setDeleteConfirmProject] =
@@ -143,12 +144,7 @@ const Dashboard: React.FC<DashboardProps> = ({
   const [expiredProjects, setExpiredProjects] = useState<Set<string>>(
     new Set()
   );
-  const [editingApiKey, setEditingApiKey] = useState<string | null>(null);
-  const [newApiKey, setNewApiKey] = useState("");
-
-  // Tab state for each project
   const [activeTab, setActiveTab] = useState<Record<string, DeploymentTab>>({});
-  // Add this near your other state declarations (around line 60-70)
   const [resourceFilter, setResourceFilter] = useState<Record<string, string>>(
     {}
   );
@@ -230,7 +226,7 @@ const Dashboard: React.FC<DashboardProps> = ({
         const functionId =
           deployment.functionId || deployment.resourceId.split("/")[0];
         const deploymentId = deployment.$id;
-        return `https://cloud.appwrite.io/console/project-${region}-${projectId}/functions/function-${functionId}/deployments/deployment-${deploymentId}`;
+        return `https://cloud.appwrite.io/console/project-${region}-${projectId}/functions/function-${functionId}/deployment-${deploymentId}`;
       } else {
         const siteId = deployment.siteId || deployment.resourceId.split("/")[0];
         const deploymentId = deployment.$id;
@@ -372,7 +368,7 @@ const Dashboard: React.FC<DashboardProps> = ({
             [documentId]: response.functions,
           }));
 
-          // Update total deployment count (sites + functions)
+          // Total deployment count (sites + functions)
           const totalDeployments =
             response.sites.total + response.functions.total;
           const currentProject = projects.find((p) => p.$id === documentId);
@@ -614,7 +610,6 @@ const Dashboard: React.FC<DashboardProps> = ({
     [newApiKey, encodeApiKey, fetchProjectDeployments]
   );
 
-  // Add this with your other helper functions (around line 140-150)
   const getUniqueResources = useCallback(
     (deployments: Deployment[], tab: DeploymentTab) => {
       const resources = new Set<string>();
@@ -1655,12 +1650,10 @@ const Dashboard: React.FC<DashboardProps> = ({
                         }
                         onChange={(e) => {
                           const filterKey = `${project.$id}-${currentTab}`;
-                          // Update filter state
                           setResourceFilter((prev) => ({
                             ...prev,
                             [filterKey]: e.target.value,
                           }));
-                          // Reset pagination for the current tab
                           setCurrentPage((prev) => ({
                             ...prev,
                             [filterKey]: 1,
@@ -1677,7 +1670,7 @@ const Dashboard: React.FC<DashboardProps> = ({
                             color: darkMode ? "#FFFFFF" : "#000000",
                             fontSize: "13px",
                             padding: "6px 12px",
-                            transition: "all 0.2s ease", // smooth hover/focus effect
+                            transition: "all 0.2s ease",
                           },
                         }}
                         SelectProps={{
@@ -1696,18 +1689,18 @@ const Dashboard: React.FC<DashboardProps> = ({
                               sx: {
                                 mt: 0.5,
                                 borderRadius: "12px",
-                                boxShadow: "0 4px 10px rgba(0,0,0,0.05)", // smoother shadow
+                                boxShadow: "0 4px 10px rgba(0,0,0,0.05)",
                                 border: darkMode
                                   ? "1px solid rgba(255,255,255,0.1)"
                                   : "1px solid rgba(0,0,0,0.1)",
                                 bgcolor: darkMode ? "#111111" : "#FFFFFF",
                                 maxHeight: 300,
-                                overflowY: "auto", // prevent lag with many items
+                                overflowY: "auto",
                                 "& .MuiMenuItem-root": {
                                   fontSize: "13px",
                                   padding: "8px 12px",
                                   color: darkMode ? "#FFFFFF" : "#000000",
-                                  transition: "background-color 0.2s ease", // smoother hover
+                                  transition: "background-color 0.2s ease",
                                   "&:hover": {
                                     bgcolor: darkMode
                                       ? "rgba(255,255,255,0.08)"

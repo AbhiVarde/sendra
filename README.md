@@ -2,24 +2,24 @@
 
 # 🪴 Introducing Sendra
 
-**Monitor Appwrite Sites Deployment.**
+**Monitor Appwrite Sites & Functions Deployments.**
 
-Never miss a failed deployment again! Sendra monitors your Appwrite deployments and sends instant email alerts when something goes wrong.
+Never miss a failed deployment again! Sendra monitors your Appwrite Sites and Functions deployments and sends instant email alerts when something goes wrong.
 
 <img width="1200" height="630" alt="og-image" src="./public/og-image.png" />
 
 ## 🎯 Problem Solved
 
-Appwrite doesn't send email notifications for failed deployments like Vercel does. Sendra fills this critical gap by monitoring your Appwrite projects and alerting you instantly when deployments fail.
+Appwrite doesn't send email notifications for failed deployments like Vercel does. Sendra fills this critical gap by monitoring your Appwrite projects (both Sites and Functions) and alerting you instantly when deployments fail.
 
 ## ✨ Key Features
 
 - 🔐 **Secure GitHub Authentication** - Login with your GitHub account
 - 📊 **Real-time Dashboard** - View your latest deployment status at a glance
-- 🕐 **Automated Monitoring** - Checks deployments every 5 minutes via cron jobs
+- 🕐 **Automated Monitoring** - Checks both Sites and Functions deployments every 5 minutes via cron jobs
 - 📧 **Smart Email Alerts** - Only sends emails for NEW failed deployments (no spam!)
 - 🔒 **Encrypted API Keys** - Your Appwrite credentials are safely encrypted
-- 🚀 **Instant Setup** - Just add your Project ID, API Key, and email
+- 🚀 **Instant Setup** - Just add your Project ID, API Key, region, and email
 
 ## 🛠️ Tech Stack
 
@@ -28,13 +28,13 @@ Appwrite doesn't send email notifications for failed deployments like Vercel doe
 - **Authentication**: GitHub OAuth
 - **Email Service**: Resend API
 - **Deployment**: Vercel
-- **Security**: Base64 encryption for API keys
+- **Security**: Encrypted API keys
 
 ## 🚀 How It Works
 
 1. **Login** with GitHub
 2. **Add** your Appwrite Project ID, API Key, and email
-3. **Monitor** - Sendra automatically checks your deployments every 5 minutes
+3. **Monitor** - Sendra automatically checks your Sites and Functions deployments every 5 minutes
 4. **Get Alerted** - Receive email notifications only for NEW failed deployments
 5. **Stay Updated** - View latest deployment status on your dashboard
 
@@ -64,6 +64,8 @@ cp .env.example .env.local
 npm run dev
 ```
 
+````
+
 ### Environment Variables
 
 ```env
@@ -73,10 +75,13 @@ NEXT_PUBLIC_APPWRITE_DATABASE_ID=
 NEXT_PUBLIC_APPWRITE_COLLECTION_ID=
 NEXT_PUBLIC_FETCH_DEPLOYMENTS_FUNCTION_ID=
 ```
+**Appwrite Collections Setup:**
+
+- **sendra**: `userId`, `projectId`, `deployments`, `functionDeployments`, `trackedDeployments[]`, `trackedFunctionDeployments[]`, `alerts`, `email`, `isActive`, `apiKey`, `region`, `$id`, `$createdAt`, `$updatedAt`
 
 ## 🔧 Appwrite Function Setup
 
-The monitoring logic runs on Appwrite Functions with a cron schedule.
+The monitoring logic runs on Appwrite Functions with a cron schedule, checking both Sites and Functions deployments.
 
 ## 🤝 Contributing
 
@@ -95,15 +100,15 @@ The monitoring logic runs on Appwrite Functions with a cron schedule.
 
 ## 💖 Support
 
-**Love ErrExplain? Help me keep building!**
+**Love Sendra? Help me keep building!**
 
-💚 **$5 / month - Monthly Supporter**  
+💚 **$5 / month - Monthly Supporter**
 Get recognition in the GitHub README under Supporters.
 
-🌟 **$19 / month - Monthly Sponsor**  
+🌟 **$19 / month - Monthly Sponsor**
 Support growth and get recognition both in the GitHub README **and** on my portfolio (abhivarde.in).
 
-🚀 **$49 / month - Featured Sponsor**  
+🚀 **$49 / month - Featured Sponsor**
 Premium support with **extra visibility**: README + Portfolio + **promotion on Sync UI**.
 
 [👉 Become a Sponsor](https://github.com/sponsors/AbhiVarde)
@@ -119,3 +124,4 @@ Sendra is created and maintained by [Abhi Varde](https://www.abhivarde.in/).
 ---
 
 ⭐ **Found this helpful? Give it a star!**
+````

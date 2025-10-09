@@ -12,25 +12,25 @@ const FeatureSection: React.FC<FeatureSectionProps> = ({ darkMode }) => {
       icon: Database,
       title: "Connect Appwrite Projects",
       description:
-        "Add your Appwrite Project ID and API Key to start monitoring deployments.",
+        "Add your Appwrite Project ID and API Key to start monitoring both Sites and Functions deployments.",
     },
     {
       icon: Activity,
       title: "Real-time Deployment Monitoring",
       description:
-        "Automatically checks deployment status and logs updates every few minutes.",
+        "Automatically checks deployment status for Sites and Functions and logs updates every few minutes.",
     },
     {
       icon: Mail,
       title: "Email Notifications",
       description:
-        "Instantly alerts you via Resend MCP when a deployment fails.",
+        "Instantly alerts you via Resend whenever a deployment fails, for both Sites and Functions.",
     },
     {
       icon: BarChart3,
       title: "Dashboard Overview",
       description:
-        "View recent deployments with status, branch, time, and detailed analytics.",
+        "View recent deployments with status, branch, time, and detailed analytics for Sites and Functions.",
     },
     {
       icon: Shield,
@@ -53,6 +53,9 @@ const FeatureSection: React.FC<FeatureSectionProps> = ({ darkMode }) => {
           sx={{
             textAlign: "center",
             mb: { xs: "32px", sm: "40px", md: "48px" },
+            maxWidth: { xs: "100%", sm: "600px", md: "700px" },
+            mx: "auto",
+            px: { xs: 2, sm: 0 },
           }}
         >
           <Typography
@@ -64,19 +67,20 @@ const FeatureSection: React.FC<FeatureSectionProps> = ({ darkMode }) => {
               lineHeight: 1.2,
             }}
           >
-            Everything you need to
+            Everything you need to{" "}
             <Typography
               variant="h3"
               component="span"
               sx={{
+                display: { xs: "inline", sm: "block" },
                 fontWeight: 500,
                 fontStyle: "italic",
                 color: darkMode ? "#FAFAFB" : "#333333",
                 fontSize: { xs: "24px", sm: "28px", md: "32px" },
+                mt: { xs: 0, sm: 1 },
               }}
             >
-              {" "}
-              monitor deployments
+              monitor Sites & Functions deployments
             </Typography>
           </Typography>
         </Box>
@@ -92,31 +96,11 @@ const FeatureSection: React.FC<FeatureSectionProps> = ({ darkMode }) => {
             justifyContent: "center",
             maxWidth: "1200px",
             mx: "auto",
-            "& > *:nth-of-type(1)": {
-              gridColumn: {
-                lg: "1 / 3",
-              },
-            },
-            "& > *:nth-of-type(2)": {
-              gridColumn: {
-                lg: "3 / 5",
-              },
-            },
-            "& > *:nth-of-type(3)": {
-              gridColumn: {
-                lg: "5 / 7",
-              },
-            },
-            "& > *:nth-of-type(4)": {
-              gridColumn: {
-                lg: "2 / 4",
-              },
-            },
-            "& > *:nth-of-type(5)": {
-              gridColumn: {
-                lg: "4 / 6",
-              },
-            },
+            "& > *:nth-of-type(1)": { gridColumn: { lg: "1 / 3" } },
+            "& > *:nth-of-type(2)": { gridColumn: { lg: "3 / 5" } },
+            "& > *:nth-of-type(3)": { gridColumn: { lg: "5 / 7" } },
+            "& > *:nth-of-type(4)": { gridColumn: { lg: "2 / 4" } },
+            "& > *:nth-of-type(5)": { gridColumn: { lg: "4 / 6" } },
           }}
         >
           {features.map((feature, index) => (
