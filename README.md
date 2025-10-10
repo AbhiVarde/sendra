@@ -4,31 +4,31 @@
 
 **Monitor Appwrite Sites & Functions Deployments.**
 
-Never miss a failed deployment again! Sendra monitors your Appwrite Sites and Functions deployments and sends instant email alerts when something goes wrong.
+Never miss a failed deployment! Sendra monitors your Appwrite Sites and Functions deployments and sends instant email alerts when something goes wrong.
 
 <img width="1200" height="630" alt="og-image" src="./public/og-image.png" />
 
-## 🎯 Problem Solved
+## 🎯 Problem
 
 Appwrite doesn't send email notifications for failed deployments like Vercel does. Sendra fills this critical gap by monitoring your Appwrite projects (both Sites and Functions) and alerting you instantly when deployments fail.
 
 ## ✨ Key Features
 
-- 🔐 **Secure GitHub Authentication** - Login with your GitHub account
-- 📊 **Real-time Dashboard** - View your latest deployment status at a glance
-- 🕐 **Automated Monitoring** - Checks both Sites and Functions deployments every 5 minutes via cron jobs
-- 📧 **Smart Email Alerts** - Only sends emails for NEW failed deployments (no spam!)
-- 🔒 **Encrypted API Keys** - Your Appwrite credentials are safely encrypted
-- 🚀 **Instant Setup** - Just add your Project ID, API Key, region, and email
+* 🔐 **Secure GitHub Authentication** - Login with your GitHub account
+* 📊 **Real-time Dashboard** - View your latest deployment status at a glance
+* 🕐 **Automated Monitoring** - Checks both Sites and Functions deployments every 5 minutes via cron jobs
+* 📧 **Smart Email Alerts** - Only sends emails for NEW failed deployments (no spam!)
+* 🔒 **Encrypted API Keys** - Your Appwrite credentials are safely encrypted
+* 🚀 **Instant Setup** - Just add your Project ID, API Key, region, and email
 
 ## 🛠️ Tech Stack
 
-- **Frontend**: Next.js, Material UI, TypeScript
-- **Backend**: Appwrite Functions & Database
-- **Authentication**: GitHub OAuth
-- **Email Service**: Resend API
-- **Deployment**: Vercel
-- **Security**: Encrypted API keys
+* **Frontend:** Next.js, Material UI, TypeScript
+* **Backend:** Appwrite Functions & Database
+* **Authentication:** GitHub OAuth
+* **Email Service:** Resend API
+* **Deployment:** Vercel
+* **Security:** Encrypted API keys
 
 ## 🚀 How It Works
 
@@ -42,9 +42,9 @@ Appwrite doesn't send email notifications for failed deployments like Vercel doe
 
 ### Prerequisites
 
-- Node.js 18+
-- Appwrite account
-- Resend account for email notifications
+* Node.js 18+
+* Appwrite account
+* Resend account for email notifications
 
 ### Local Development
 
@@ -74,41 +74,38 @@ NEXT_PUBLIC_APPWRITE_COLLECTION_ID=
 NEXT_PUBLIC_FETCH_DEPLOYMENTS_FUNCTION_ID=
 ```
 
-**Appwrite Collections Setup:**
+## 📂 Appwrite Setup
 
-- **sendra**: `userId`, `projectId`, `deployments`, `functionDeployments`, `trackedDeployments[]`, `trackedFunctionDeployments[]`, `alerts`, `email`, `isActive`, `apiKey`, `region`, `$id`, `$createdAt`, `$updatedAt`
+### 🏗️ Collections
 
-## 🔧 Appwrite Function Setup
+* **sendra**: `userId`, `projectId`, `deployments`, `functionDeployments`, `trackedDeployments[]`, `trackedFunctionDeployments[]`, `alerts`, `email`, `isActive`, `apiKey`, `region`, `$id`, `$createdAt`, `$updatedAt`
 
-The monitoring logic runs on Appwrite Functions with a cron schedule, checking both Sites and Functions deployments.
+### ⚡ Functions
+
+* The monitoring logic runs on Appwrite Functions with a cron schedule, checking both Sites and Functions deployments
 
 ## 🤝 Contributing
 
 1. Fork the repository
-2. Create feature branch (`git checkout -b feature/amazing-feature`)
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
 3. Commit changes (`git commit -m 'feat: add amazing feature'`)
 4. Push to branch (`git push origin feature/amazing-feature`)
 5. Open Pull Request
 
 **Development Guidelines:**
 
-- Follow existing code patterns
-- Test error scenarios thoroughly
-- Maintain responsive design
-- Keep commits focused and descriptive
+* Follow existing code patterns
+* Test error scenarios thoroughly
+* Maintain responsive design
+* Keep commits focused and descriptive
 
 ## 💖 Support
 
 **Love Sendra? Help me keep building!**
 
-💚 **$5 / month - Monthly Supporter**
-Get recognition in the GitHub README under Supporters.
-
-🌟 **$19 / month - Monthly Sponsor**
-Support growth and get recognition both in the GitHub README **and** on my portfolio (abhivarde.in).
-
-🚀 **$49 / month - Featured Sponsor**
-Premium support with **extra visibility**: README + Portfolio + **promotion on Sync UI**.
+* 💚 **$5 / month - Monthly Supporter** → Recognition in the GitHub README
+* 🌟 **$19 / month - Monthly Sponsor** → README + Portfolio recognition
+* 🚀 **$49 / month - Featured Sponsor** → README + Portfolio + promotion on Sync UI
 
 [👉 Become a Sponsor](https://github.com/sponsors/AbhiVarde)
 
