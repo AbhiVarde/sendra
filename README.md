@@ -16,7 +16,7 @@ Appwrite doesn't send email notifications for failed deployments like Vercel doe
 
 * 🔐 **Secure GitHub Authentication** - Login with your GitHub account
 * 📊 **Real-time Dashboard** - View your latest deployment status at a glance
-* 🕐 **Automated Monitoring** - Checks both Sites and Functions deployments every 5 minutes via cron jobs
+* 🕐 **Automated Monitoring** - Checks both Sites and Functions deployments every 2 minutes via cron jobs
 * 📧 **Smart Email Alerts** - Only sends emails for NEW failed deployments (no spam!)
 * 🤖 **AI Deployment Analysis** - Analyzes logs of failed deployments and suggests potential fixes
 * 🔒 **Encrypted API Keys** - Your Appwrite credentials are safely encrypted
@@ -36,7 +36,7 @@ Appwrite doesn't send email notifications for failed deployments like Vercel doe
 
 1. **Login** with GitHub
 2. **Add** your Appwrite Project ID, API Key, and email
-3. **Monitor** - Sendra automatically checks your Sites and Functions deployments every 5 minutes
+3. **Monitor** - Sendra automatically checks your Sites and Functions deployments every 2 minutes
 4. **Get Alerted** - Receive email notifications only for NEW failed deployments
 5. **AI Analysis** - Failed deployment logs are analyzed using AI, and Sendra suggests potential fixes
 6. **Stay Updated** - View latest deployment status on your dashboard
