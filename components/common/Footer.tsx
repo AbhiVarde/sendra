@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Stack, Typography, Link, Divider } from "@mui/material";
+import { Box, Stack, Typography, Link } from "@mui/material";
 import { X } from "lucide-react";
 
 interface FooterProps {
@@ -32,6 +32,7 @@ const Footer: React.FC<FooterProps> = ({ darkMode }) => {
           }}
         />
 
+        {/* Top Row: Powered by + Built by */}
         <Stack
           direction={{ xs: "column", sm: "row" }}
           justifyContent="space-between"
@@ -78,9 +79,15 @@ const Footer: React.FC<FooterProps> = ({ darkMode }) => {
                   fontSize: "13px",
                   fontWeight: 500,
                   transition: "all 0.2s ease",
+                  outline: "none",
+                  border: "none",
                   "&:hover": {
                     color: darkMode ? "#fff" : "#000",
                     transform: "translateY(-1px)",
+                  },
+                  "&:focus": {
+                    outline: "none",
+                    border: "none",
                   },
                 }}
               >
@@ -88,11 +95,7 @@ const Footer: React.FC<FooterProps> = ({ darkMode }) => {
                   component="img"
                   src="https://appwrite.io/images/logos/logo.svg"
                   alt="Appwrite"
-                  sx={{
-                    height: 16,
-                    width: "auto",
-                    filter: "none",
-                  }}
+                  sx={{ height: 16, width: 16, objectFit: "contain" }}
                 />
                 Appwrite
               </Link>
@@ -115,9 +118,15 @@ const Footer: React.FC<FooterProps> = ({ darkMode }) => {
                   fontSize: "13px",
                   fontWeight: 500,
                   transition: "all 0.2s ease",
+                  outline: "none",
+                  border: "none",
                   "&:hover": {
                     color: darkMode ? "#fff" : "#000",
                     transform: "translateY(-1px)",
+                  },
+                  "&:focus": {
+                    outline: "none",
+                    border: "none",
                   },
                 }}
               >
@@ -125,9 +134,49 @@ const Footer: React.FC<FooterProps> = ({ darkMode }) => {
                   component="img"
                   src="https://resend.com/static/favicons/favicon.ico?v=1"
                   alt="Resend"
-                  sx={{ height: 16, width: 16, borderRadius: "2px" }}
+                  sx={{ height: 16, width: 16, objectFit: "contain" }}
                 />
                 Resend
+              </Link>
+
+              <X
+                size={12}
+                color={darkMode ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)"}
+              />
+
+              {/* Vercel AI SDK */}
+              <Link
+                href="https://sdk.vercel.ai"
+                target="_blank"
+                rel="noopener"
+                underline="none"
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  color: darkMode ? "#fff" : "rgba(0,0,0,0.8)",
+                  fontSize: "13px",
+                  fontWeight: 500,
+                  transition: "all 0.2s ease",
+                  outline: "none",
+                  border: "none",
+                  "&:hover": {
+                    color: darkMode ? "#fff" : "#000",
+                    transform: "translateY(-1px)",
+                  },
+                  "&:focus": {
+                    outline: "none",
+                    border: "none",
+                  },
+                }}
+              >
+                <Box
+                  component="img"
+                  src="https://pbs.twimg.com/profile_images/1856739755280527360/qPyTbiar_400x400.jpg"
+                  alt="Vercel AI SDK"
+                  sx={{ height: 16, width: 16, objectFit: "contain" }}
+                />
+                Vercel AI SDK
               </Link>
             </Stack>
           </Stack>
@@ -156,7 +205,13 @@ const Footer: React.FC<FooterProps> = ({ darkMode }) => {
                 sx={{
                   color: darkMode ? "#fff" : "rgba(0,0,0,0.8)",
                   fontWeight: 500,
+                  outline: "none",
+                  border: "none",
                   "&:hover": { color: darkMode ? "#fff" : "#000" },
+                  "&:focus": {
+                    outline: "none",
+                    border: "none",
+                  },
                 }}
               >
                 Abhi Varde
@@ -182,8 +237,14 @@ const Footer: React.FC<FooterProps> = ({ darkMode }) => {
                 color: darkMode ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.6)",
                 fontSize: "12px",
                 fontWeight: 400,
+                outline: "none",
+                border: "none",
                 "&:hover": {
                   color: darkMode ? "#fff" : "rgba(0,0,0,0.8)",
+                },
+                "&:focus": {
+                  outline: "none",
+                  border: "none",
                 },
                 whiteSpace: "nowrap",
               }}
@@ -223,14 +284,20 @@ const Footer: React.FC<FooterProps> = ({ darkMode }) => {
                 color: darkMode ? "#fff" : "rgba(0,0,0,0.8)",
                 fontWeight: 500,
                 fontSize: "12px",
+                outline: "none",
+                border: "none",
                 "&:hover": { color: darkMode ? "#fff" : "#000" },
+                "&:focus": {
+                  outline: "none",
+                  border: "none",
+                },
               }}
             >
               <Box
                 component="img"
                 src="https://vercel.com/favicon.ico"
                 alt="Vercel"
-                sx={{ height: 16, width: 16 }}
+                sx={{ height: 16, width: 16, objectFit: "contain" }}
               />
               Vercel
             </Link>
