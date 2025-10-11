@@ -34,103 +34,94 @@ const Header: React.FC<HeaderProps> = ({
 
   useEffect(() => {
     let controls;
-    const gap = 0;
-    const contentSize = width + gap;
+    const contentSize = width;
     const from = 0;
     const to = -contentSize / 2;
-    const distanceToTravel = Math.abs(to - from);
-    const duration = distanceToTravel / currentSpeed;
+    const distance = Math.abs(to - from);
+    const duration = distance / currentSpeed;
 
     if (isTransitioning) {
-      const remainingDistance = Math.abs(translation.get() - to);
-      const transitionDuration = remainingDistance / currentSpeed;
+      const remaining = Math.abs(translation.get() - to);
+      const remainingDuration = remaining / currentSpeed;
       controls = animate(translation, [translation.get(), to], {
         ease: "linear",
-        duration: transitionDuration,
+        duration: remainingDuration,
         onComplete: () => {
           setIsTransitioning(false);
-          setKey((prevKey) => prevKey + 1);
+          setKey((k) => k + 1);
         },
       });
     } else {
       controls = animate(translation, [from, to], {
         ease: "linear",
-        duration: duration,
+        duration,
         repeat: Infinity,
         repeatType: "loop",
-        repeatDelay: 0,
-        onRepeat: () => {
-          translation.set(from);
-        },
+        onRepeat: () => translation.set(from),
       });
     }
 
     return controls?.stop;
   }, [key, translation, currentSpeed, width, isTransitioning]);
 
+  const textStyle = {
+    mx: { xs: 1.2, sm: 2, md: 3 },
+    fontSize: { xs: "11px", sm: "12px", md: "13px", lg: "14px" },
+    whiteSpace: "nowrap" as const,
+    lineHeight: 1.6,
+    display: "inline-flex",
+    alignItems: "center",
+  };
+
+  const linkStyle = {
+    marginLeft: "6px",
+  };
+
   const announcements = (
     <>
-      <Typography
-        component="span"
-        sx={{
-          mx: { xs: 1, sm: 2, md: 3 }, // smaller margins on mobile
-          fontSize: { xs: "10px", sm: "12px", md: "13px", lg: "14px" }, // slightly smaller for mobile
-          whiteSpace: "nowrap",
-        }}
-      >
-        🚀{" "}
-        <Box component="span" sx={{ fontWeight: 500 }}>
-          Idea Tracker
-        </Box>{" "}
-        (Appwrite Project of the Month) →{" "}
-        <a
-          href="https://idea-tracker-v2.appwrite.network"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          idea-tracker-v2.appwrite.network
-        </a>
-      </Typography>
-
-      <Typography
-        component="span"
-        sx={{
-          mx: { xs: 1, sm: 2, md: 3 },
-          fontSize: { xs: "10px", sm: "12px", md: "13px", lg: "14px" },
-          whiteSpace: "nowrap",
-        }}
-      >
+      <Typography component="span" sx={textStyle}>
         ⚡{" "}
-        <Box component="span" sx={{ fontWeight: 500 }}>
+        <Box component="span" sx={{ fontWeight: 500, mx: 0.4 }}>
           Sync UI
-        </Box>{" "}
-        (75+ GitHub stars, used in 70+ countries) →{" "}
+        </Box>
+        (75+ GitHub stars, used in 70+ countries) →
         <a
           href="https://syncui.design"
           target="_blank"
           rel="noopener noreferrer"
+          style={linkStyle}
         >
           syncui.design
         </a>
       </Typography>
 
-      <Typography
-        component="span"
-        sx={{
-          mx: { xs: 1, sm: 2, md: 3 },
-          fontSize: { xs: "10px", sm: "12px", md: "13px", lg: "14px" },
-          whiteSpace: "nowrap",
-        }}
-      >
+      <Typography component="span" sx={textStyle}>
+        🚀{" "}
+        <Box component="span" sx={{ fontWeight: 500, mx: 0.4 }}>
+          Idea Tracker
+        </Box>
+        (Appwrite Project of the Month) →
+        <a
+          href="https://idea-tracker-v2.appwrite.network"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={linkStyle}
+        >
+          idea-tracker-v2.appwrite.network
+        </a>
+      </Typography>
+
+      <Typography component="span" sx={textStyle}>
         🧩{" "}
-        <Box component="span" sx={{ fontWeight: 500 }}>
+        <Box component="span" sx={{ fontWeight: 500, mx: 0.4 }}>
           ErrExplain
-        </Box>{" "}
-        (hackathon project with Vercel AI SDK + Appwrite) →{" "}
+        </Box>
+        (Hackathon project with Vercel AI SDK + Appwrite) →
         <a
           href="https://errexplain.appwrite.network"
           target="_blank"
           rel="noopener noreferrer"
+          style={linkStyle}
         >
           errexplain.appwrite.network
         </a>
@@ -139,15 +130,7 @@ const Header: React.FC<HeaderProps> = ({
   );
 
   return (
-    <Box
-      sx={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        zIndex: 1000,
-      }}
-    >
+    <Box sx={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 1000 }}>
       <Box
         sx={{
           width: "100%",
@@ -156,7 +139,7 @@ const Header: React.FC<HeaderProps> = ({
           borderBottom: `1px solid ${
             darkMode ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)"
           }`,
-          fontSize: { xs: "10px", sm: "12px", md: "13px", lg: "14px" },
+          fontSize: { xs: "11px", sm: "12px", md: "13px", lg: "14px" },
           overflow: "hidden",
           py: 0.5,
         }}
@@ -183,14 +166,7 @@ const Header: React.FC<HeaderProps> = ({
         </motion.div>
       </Box>
 
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          px: 2,
-          pt: 2,
-        }}
-      >
+      <Box sx={{ display: "flex", justifyContent: "center", px: 2, pt: 2 }}>
         <Box
           sx={{
             width: "100%",
@@ -227,12 +203,7 @@ const Header: React.FC<HeaderProps> = ({
             onClick={onLogoClick}
             sx={{
               cursor: onLogoClick ? "pointer" : "default",
-              "&:hover": onLogoClick
-                ? {
-                    opacity: 0.8,
-                    transition: "opacity 0.2s ease",
-                  }
-                : {},
+              "&:hover": onLogoClick ? { opacity: 0.8 } : {},
             }}
           >
             <Mail size={20} color={darkMode ? "#fff" : "#000"} />
@@ -264,7 +235,6 @@ const Header: React.FC<HeaderProps> = ({
                     ? "rgba(255,255,255,0.1)"
                     : "rgba(0,0,0,0.08)",
                 },
-                "&:focus": { outline: "none" },
               }}
               title="Read ErrExplain Blog"
             >
@@ -287,7 +257,6 @@ const Header: React.FC<HeaderProps> = ({
                     ? "rgba(255,255,255,0.1)"
                     : "rgba(0,0,0,0.08)",
                 },
-                "&:focus": { outline: "none" },
               }}
             >
               <Github size={14} />
@@ -306,7 +275,6 @@ const Header: React.FC<HeaderProps> = ({
                     ? "rgba(255,255,255,0.1)"
                     : "rgba(0,0,0,0.08)",
                 },
-                "&:focus": { outline: "none" },
               }}
             >
               {darkMode ? <Sun size={14} /> : <Moon size={14} />}
@@ -326,7 +294,6 @@ const Header: React.FC<HeaderProps> = ({
                       ? "rgba(255,255,255,0.1)"
                       : "rgba(0,0,0,0.08)",
                   },
-                  "&:focus": { outline: "none" },
                 }}
               >
                 <LogOut size={14} />
