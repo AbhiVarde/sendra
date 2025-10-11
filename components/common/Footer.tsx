@@ -32,7 +32,6 @@ const Footer: React.FC<FooterProps> = ({ darkMode }) => {
           }}
         />
 
-        {/* Top Row: Powered by + Built by */}
         <Stack
           direction={{ xs: "column", sm: "row" }}
           justifyContent="space-between"
@@ -44,6 +43,7 @@ const Footer: React.FC<FooterProps> = ({ darkMode }) => {
             direction="row"
             alignItems="center"
             spacing={1}
+            gap={{ xs: 0.5, sm: 0 }}
             sx={{
               flexWrap: "wrap",
               justifyContent: { xs: "center", sm: "flex-start" },
@@ -144,7 +144,6 @@ const Footer: React.FC<FooterProps> = ({ darkMode }) => {
                 color={darkMode ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)"}
               />
 
-              {/* Vercel AI SDK */}
               <Link
                 href="https://sdk.vercel.ai"
                 target="_blank"
