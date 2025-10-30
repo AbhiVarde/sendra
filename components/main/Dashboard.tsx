@@ -1185,6 +1185,8 @@ const Dashboard: React.FC<DashboardProps> = ({
                     <MenuItem value="nyc">🇺🇸 New York (NYC)</MenuItem>
                     <MenuItem value="syd">🇦🇺 Sydney (SYD)</MenuItem>
                     <MenuItem value="sfo">🇺🇸 San Francisco (SFO)</MenuItem>
+                    <MenuItem value="sgp">🇸🇬 Singapore (SGP)</MenuItem>
+                    <MenuItem value="tor">🇨🇦 Toronto (TOR)</MenuItem>
                   </TextField>
                   <TextField
                     placeholder="Email (optional)"
