@@ -16,11 +16,25 @@ Appwrite doesn't send email notifications for failed deployments like Vercel doe
 
 * 🔐 **Secure GitHub Authentication** - Login with your GitHub account
 * 📊 **Real-time Dashboard** - View your latest deployment status at a glance
+* 🌍 **Global Region Support** - Monitor deployments across all 6 Appwrite Cloud regions
 * 🕐 **Automated Monitoring** - Checks both Sites and Functions deployments every 2 minutes via cron jobs
 * 📧 **Smart Email Alerts** - Only sends emails for NEW failed deployments (no spam!)
 * 🤖 **AI Deployment Analysis** - Analyzes logs of failed deployments and suggests potential fixes
 * 🔒 **Encrypted API Keys** - Your Appwrite credentials are safely encrypted
 * 🚀 **Instant Setup** - Just add your Project ID, API Key, region, and email
+
+## 🌍 Supported Regions
+
+Monitor your Appwrite deployments globally across all available regions:
+
+| Region | Code | Location |
+|--------|------|----------|
+| 🇩🇪 Frankfurt | FRA | Germany |
+| 🇺🇸 New York | NYC | United States |
+| 🇦🇺 Sydney | SYD | Australia |
+| 🇺🇸 San Francisco | SFO | United States |
+| 🇸🇬 Singapore | SGP | Singapore |
+| 🇨🇦 Toronto | TOR | Canada |
 
 ## 🛠️ Tech Stack
 
