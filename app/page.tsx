@@ -18,6 +18,32 @@ export default function SendraApp() {
   const [showForm, setShowForm] = useState(false);
 
   useEffect(() => {
+    console.log(
+      "%c                          .___              \n" +
+        "  ______ ____   ____    __| _/___________   \n" +
+        " /  ___// __ \\ /    \\  / __ |\\_  __ \\__  \\  \n" +
+        " \\___ \\\\  ___/|   |  \\/ /_/ | |  | \\/ __ \\_\n" +
+        "/____  >\\___  >___|  /\\____ | |__|  (____  /\n" +
+        "     \\/     \\/     \\/      \\/            \\/\n",
+      "color: #FFFFFF; font-family: monospace; font-size: 12px; font-weight: bold;"
+    );
+
+    console.log(
+      "%c🤖 Sendra → Monitor your Appwrite Sites and Functions deployments\n" +
+        "⚠️ Receive instant email notifications whenever a deployment fails\n" +
+        "⚙️ Powered by Resend + Appwrite + Vercel AI SDK\n",
+      "color: #FFFFFF; font-family: monospace; font-size: 12px;"
+    );
+
+    console.log(
+      "%c👋 Hi, I'm Abhi Varde  Product & Frontend Engineer\n" +
+        "🚀 Explore more open-source projects → https://github.com/AbhiVarde\n" +
+        "🤍 If you like this project, drop a ⭐ and let me know!\n",
+      "color: #FFFFFF; font-family: monospace; font-size: 12px; font-weight: bold;"
+    );
+  }, []);
+
+  useEffect(() => {
     const savedTheme = localStorage.getItem("theme");
     if (savedTheme) {
       setDarkMode(savedTheme === "dark");
