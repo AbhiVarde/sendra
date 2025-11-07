@@ -168,14 +168,23 @@ const Dashboard: React.FC<DashboardProps> = ({
   }, [user]);
 
   const encodeApiKey = useCallback(async (apiKey: string): Promise<string> => {
-    const SECRET_KEY = process.env.APPWRITE_ENCRYPTION_SECRET || "";
+    const SECRET_KEY = process.env.NEXT_PUBLIC_APPWRITE_ENCRYPTION_SECRET || "";
 
+    // Make sure key is exactly 32 bytes
     const encoder = new TextEncoder();
+    const secretBytes = encoder.encode(SECRET_KEY);
+    const keyBytes = new Uint8Array(32);
+
+    // Copy secret into 32-byte array
+    for (let i = 0; i < 32; i++) {
+      keyBytes[i] = i < secretBytes.length ? secretBytes[i] : 0;
+    }
+
     const data = encoder.encode(apiKey);
 
     const key = await crypto.subtle.importKey(
       "raw",
-      encoder.encode(SECRET_KEY.substring(0, 32)),
+      keyBytes,
       { name: "AES-CBC", length: 256 },
       false,
       ["encrypt"]
