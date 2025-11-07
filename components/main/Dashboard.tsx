@@ -168,7 +168,7 @@ const Dashboard: React.FC<DashboardProps> = ({
   }, [user]);
 
   const encodeApiKey = useCallback(async (apiKey: string): Promise<string> => {
-    const SECRET_KEY = process.env.NEXT_PUBLIC_ENCRYPTION_SECRET || "";
+    const SECRET_KEY = process.env.APPWRITE_ENCRYPTION_SECRET || "";
 
     const encoder = new TextEncoder();
     const data = encoder.encode(apiKey);
@@ -348,7 +348,7 @@ const Dashboard: React.FC<DashboardProps> = ({
 
       try {
         result = await functions.createExecution(
-          process.env.NEXT_PUBLIC_FETCH_DEPLOYMENTS_FUNCTION_ID!,
+          process.env.NEXT_PUBLIC_APPWRITE_FETCH_DEPLOYMENTS_FUNCTION_ID!,
           JSON.stringify({ projectId, apiKey: encodedApiKey }),
           false
         );

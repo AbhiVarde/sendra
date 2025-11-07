@@ -14,37 +14,37 @@ Appwrite doesn't send email notifications for failed deployments like Vercel doe
 
 ## ✨ Key Features
 
-* 🔐 **Secure GitHub Authentication** - Login with your GitHub account
-* 📊 **Real-time Dashboard** - View your latest deployment status at a glance
-* 🌍 **Global Region Support** - Monitor deployments across all 6 Appwrite Cloud regions
-* 🕐 **Automated Monitoring** - Checks both Sites and Functions deployments every 2 minutes via cron jobs
-* 📧 **Smart Email Alerts** - Only sends emails for NEW failed deployments (no spam!)
-* 🤖 **AI Deployment Analysis** - Analyzes logs of failed deployments and suggests potential fixes
-* 🔒 **Encrypted API Keys** - Your Appwrite credentials are safely encrypted
-* 🚀 **Instant Setup** - Just add your Project ID, API Key, region, and email
+- 🔐 **Secure GitHub Authentication** - Login with your GitHub account
+- 📊 **Real-time Dashboard** - View your latest deployment status at a glance
+- 🌍 **Global Region Support** - Monitor deployments across all 6 Appwrite Cloud regions
+- 🕐 **Automated Monitoring** - Checks both Sites and Functions deployments every 2 minutes via cron jobs
+- 📧 **Smart Email Alerts** - Only sends emails for NEW failed deployments (no spam!)
+- 🤖 **AI Deployment Analysis** - Analyzes logs of failed deployments and suggests potential fixes
+- 🔒 **Encrypted API Keys** - Your Appwrite credentials are safely encrypted
+- 🚀 **Instant Setup** - Just add your Project ID, API Key, region, and email
 
 ## 🌍 Supported Regions
 
 Monitor your Appwrite deployments globally across all available regions:
 
-| Region | Code | Location |
-|--------|------|----------|
-| 🇩🇪 Frankfurt | FRA | Germany |
-| 🇺🇸 New York | NYC | United States |
-| 🇦🇺 Sydney | SYD | Australia |
-| 🇺🇸 San Francisco | SFO | United States |
-| 🇸🇬 Singapore | SGP | Singapore |
-| 🇨🇦 Toronto | TOR | Canada |
+| Region           | Code | Location      |
+| ---------------- | ---- | ------------- |
+| 🇩🇪 Frankfurt     | FRA  | Germany       |
+| 🇺🇸 New York      | NYC  | United States |
+| 🇦🇺 Sydney        | SYD  | Australia     |
+| 🇺🇸 San Francisco | SFO  | United States |
+| 🇸🇬 Singapore     | SGP  | Singapore     |
+| 🇨🇦 Toronto       | TOR  | Canada        |
 
 ## 🛠️ Tech Stack
 
-* **Frontend:** Next.js, Material UI, TypeScript
-* **Backend:** Appwrite Functions & Database
-* **Authentication:** GitHub OAuth
-* **Email Service:** Resend API
-* **AI Analysis**: Vercel AI SDK powered by Gemini
-* **Deployment:** Vercel
-* **Security:** Encrypted API keys
+- **Frontend:** Next.js, Material UI, TypeScript
+- **Backend:** Appwrite Functions & Database
+- **Authentication:** GitHub OAuth
+- **Email Service:** Resend API
+- **AI Analysis**: Vercel AI SDK powered by Gemini
+- **Deployment:** Vercel
+- **Security:** Encrypted API keys
 
 ## 🚀 How It Works
 
@@ -59,9 +59,9 @@ Monitor your Appwrite deployments globally across all available regions:
 
 ### Prerequisites
 
-* Node.js 18+
-* Appwrite account
-* Resend account for email notifications
+- Node.js 18+
+- Appwrite account
+- Resend account for email notifications
 
 ### Local Development
 
@@ -84,23 +84,25 @@ npm run dev
 ### Environment Variables
 
 ```env
-NEXT_PUBLIC_APPWRITE_PROJECT_ID=
 NEXT_PUBLIC_APPWRITE_ENDPOINT=
+NEXT_PUBLIC_APPWRITE_PROJECT_ID=
 NEXT_PUBLIC_APPWRITE_DATABASE_ID=
 NEXT_PUBLIC_APPWRITE_COLLECTION_ID=
-NEXT_PUBLIC_FETCH_DEPLOYMENTS_FUNCTION_ID=
-NEXT_PUBLIC_ENCRYPTION_SECRET=
+NEXT_PUBLIC_APPWRITE_FETCH_DEPLOYMENTS_FUNCTION_ID=
+
+APPWRITE_ENCRYPTION_SECRET=
+RESEND_INBOUND_WEBHOOK_SECRET=
 ```
 
 ## 📂 Appwrite Setup
 
 ### 🏗️ Collections
 
-* **sendra**: `userId`, `projectId`, `deployments`, `functionDeployments`, `trackedDeployments[]`, `trackedFunctionDeployments[]`, `alerts`, `email`, `isActive`, `apiKey`, `region`, `$id`, `$createdAt`, `$updatedAt`
+- **sendra**: `userId`, `projectId`, `deployments`, `functionDeployments`, `trackedDeployments[]`, `trackedFunctionDeployments[]`, `alerts`, `email`, `isActive`, `apiKey`, `region`, `$id`, `$createdAt`, `$updatedAt`
 
 ### ⚡ Functions
 
-* The monitoring logic runs on Appwrite Functions with a cron schedule, checking both Sites and Functions deployments
+- The monitoring logic runs on Appwrite Functions with a cron schedule, checking both Sites and Functions deployments
 
 ## 🤝 Contributing
 
@@ -112,18 +114,18 @@ NEXT_PUBLIC_ENCRYPTION_SECRET=
 
 **Development Guidelines:**
 
-* Follow existing code patterns
-* Test error scenarios thoroughly
-* Maintain responsive design
-* Keep commits focused and descriptive
+- Follow existing code patterns
+- Test error scenarios thoroughly
+- Maintain responsive design
+- Keep commits focused and descriptive
 
 ## 💖 Support
 
 **Love Sendra? Help me keep building!**
 
-* 💚 **$5 / month - Monthly Supporter** → Recognition in the GitHub README
-* 🌟 **$19 / month - Monthly Sponsor** → README + Portfolio recognition
-* 🚀 **$49 / month - Featured Sponsor** → README + Portfolio + promotion on Sync UI
+- 💚 **$5 / month - Monthly Supporter** → Recognition in the GitHub README
+- 🌟 **$19 / month - Monthly Sponsor** → README + Portfolio recognition
+- 🚀 **$49 / month - Featured Sponsor** → README + Portfolio + promotion on Sync UI
 
 [👉 Become a Sponsor](https://github.com/sponsors/AbhiVarde)
 
