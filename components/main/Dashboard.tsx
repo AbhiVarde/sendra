@@ -721,6 +721,20 @@ const Dashboard: React.FC<DashboardProps> = ({
 
         toast.success("Project connected securely");
 
+        try {
+          await functions.createExecution(
+            process.env.NEXT_PUBLIC_APPWRITE_FETCH_DEPLOYMENTS_FUNCTION_ID!,
+            JSON.stringify({
+              projectId: formData.projectId.trim(),
+              apiKey: encodedApiKey,
+              checkFailures: true,
+            }),
+            false
+          );
+        } catch (monitorError) {
+          console.error("Initial failure check failed:", monitorError);
+        }
+
         await fetchProjectDeployments(
           projectData.$id!,
           formData.projectId.trim(),
