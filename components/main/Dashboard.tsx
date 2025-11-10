@@ -111,6 +111,8 @@ const Dashboard: React.FC<DashboardProps> = ({
   onToggleForm,
 }) => {
   const [showForm, setShowForm] = useState(showFormProp ?? false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
@@ -434,6 +436,7 @@ const Dashboard: React.FC<DashboardProps> = ({
         }
       } finally {
         setDeploymentLoading((prev) => ({ ...prev, [documentId]: false }));
+        setIsSubmitting(false);
       }
     },
     [
@@ -692,6 +695,7 @@ const Dashboard: React.FC<DashboardProps> = ({
       }
 
       setLoading(true);
+      setIsSubmitting(true);
 
       try {
         const encodedApiKey = await encodeApiKey(formData.apiKey.trim());
@@ -725,6 +729,7 @@ const Dashboard: React.FC<DashboardProps> = ({
 
         resetForm();
         onToggleForm?.(false);
+        setShowForm(false);
       } catch (err: any) {
         console.error("Project creation error:", err);
         if (err.code === 409) {
@@ -732,6 +737,7 @@ const Dashboard: React.FC<DashboardProps> = ({
         } else {
           toast.error("Failed to connect project");
         }
+        setIsSubmitting(false);
       } finally {
         setLoading(false);
       }
@@ -1011,7 +1017,7 @@ const Dashboard: React.FC<DashboardProps> = ({
             </Alert>
           )}
 
-          {projects.length === 0 && !showForm && (
+          {projects.length === 0 && !showForm && !isSubmitting && (
             <Box sx={{ ...cardStyle, p: 4, textAlign: "center" }}>
               <Typography
                 variant="h5"
@@ -1273,8 +1279,34 @@ const Dashboard: React.FC<DashboardProps> = ({
             </Box>
           )}
 
-          {/* PROJECTS LIST */}
-          {projects.length > 0 && (
+          {isSubmitting && projects.length > 0 && (
+            <Box sx={cardStyle}>
+              <Box sx={{ p: 4, textAlign: "center" }}>
+                <Typography
+                  variant="body1"
+                  sx={{
+                    fontWeight: 500,
+                    mb: 1,
+                    color: darkMode ? "#FFFFFF" : "#000000",
+                    fontSize: "16px",
+                  }}
+                >
+                  Loading project deployments...
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: darkMode ? "#888888" : "#666666",
+                    fontSize: "14px",
+                  }}
+                >
+                  Please wait while we fetch your deployment data
+                </Typography>
+              </Box>
+            </Box>
+          )}
+
+          {projects.length > 0 && !isSubmitting && (
             <Stack spacing={2}>
               {projects.map((project) => {
                 const currentTab = activeTab[project.$id || ""] || "sites";
