@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
         "svix-signature": svixSignature,
       },
       body: JSON.stringify({
-        data: JSON.stringify(completePayload),
+        body: JSON.stringify(completePayload),
         async: false,
       }),
     });
