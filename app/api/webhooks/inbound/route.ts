@@ -14,11 +14,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing headers" }, { status: 401 });
     }
 
-    const bodyText = await req.text();
+    // Get ORIGINAL body text - needed for signature verification
+    const originalBodyText = await req.text();
     let webhookPayload;
 
     try {
-      webhookPayload = JSON.parse(bodyText);
+      webhookPayload = JSON.parse(originalBodyText);
     } catch (parseErr) {
       console.error("❌ Failed to parse payload:", parseErr);
       return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
@@ -40,7 +41,7 @@ export async function POST(req: NextRequest) {
 
     console.log("📄 Text preview:", emailContent.data?.text?.substring(0, 100));
 
-    // Create payload WITH Svix headers inside the body
+    // Create payload with email content AND original body for verification
     const completePayload = {
       ...webhookPayload,
       data: {
@@ -48,12 +49,13 @@ export async function POST(req: NextRequest) {
         text: emailContent.data?.text || "",
         html: emailContent.data?.html || "",
       },
-      // Include Svix headers IN the body so function can access them
       svixHeaders: {
         id: svixId,
         timestamp: svixTimestamp,
         signature: svixSignature,
       },
+      // Include ORIGINAL body for signature verification
+      originalBody: originalBodyText,
     };
 
     const functionId =
