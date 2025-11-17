@@ -14,7 +14,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing headers" }, { status: 401 });
     }
 
-    // Get ORIGINAL body text - needed for signature verification
     const originalBodyText = await req.text();
     let webhookPayload;
 
@@ -29,32 +28,21 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true }, { status: 200 });
     }
 
-    const emailData = webhookPayload.data;
-    const emailId = emailData.email_id;
+    console.log("📨 Email from:", webhookPayload.data.from);
+    console.log("📄 Text length:", webhookPayload.data.text?.length || 0);
+    console.log(
+      "📄 Text preview:",
+      webhookPayload.data.text?.substring(0, 100)
+    );
 
-    console.log("📨 Email from:", emailData.from);
-    console.log("🆔 Email ID:", emailId);
-
-    // Fetch email content
-    const resend = new Resend(process.env.RESEND_API_KEY);
-    const emailContent = await resend.emails.get(emailId);
-
-    console.log("📄 Text preview:", emailContent.data?.text?.substring(0, 100));
-
-    // Create payload with email content AND original body for verification
+    // Forward to Appwrite with original body for verification
     const completePayload = {
       ...webhookPayload,
-      data: {
-        ...emailData,
-        text: emailContent.data?.text || "",
-        html: emailContent.data?.html || "",
-      },
       svixHeaders: {
         id: svixId,
         timestamp: svixTimestamp,
         signature: svixSignature,
       },
-      // Include ORIGINAL body for signature verification
       originalBody: originalBodyText,
     };
 
