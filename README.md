@@ -14,14 +14,17 @@ Appwrite doesn't send email notifications for failed deployments like Vercel doe
 
 ## ✨ Key Features
 
-- 🔐 **Secure GitHub Authentication** - Login with your GitHub account
-- 📊 **Real-time Dashboard** - View your latest deployment status at a glance
-- 🌍 **Global Region Support** - Monitor deployments across all 6 Appwrite Cloud regions
-- 🕐 **Automated Monitoring** - Checks both Sites and Functions deployments every 2 minutes via cron jobs
-- 📧 **Smart Email Alerts** - Only sends emails for NEW failed deployments (no spam!)
-- 🤖 **AI Deployment Analysis** - Analyzes logs of failed deployments and suggests potential fixes
-- 🔒 **Encrypted API Keys** - Your Appwrite credentials are safely encrypted
-- 🚀 **Instant Setup** - Just add your Project ID, API Key, region, and email
+- 🔐 **GitHub Login** – Secure and instant authentication
+- 🔌 **Connect Projects** – Add Project ID & API Key to start monitoring
+- 📡 **Automatic Monitoring** – Tracks Sites & Functions deployments in real time
+- 📊 **Dashboard Overview** – View latest status, history, and analytics
+- 🌍 **Region Support** – Works across all 6 Appwrite Cloud regions
+- 📧 **Email Alerts** – Alerts you instantly for **new** failed deployments
+- 🧠 **AI Log Analysis** – Explains failure logs & suggests possible fixes
+- 💬 **Slash Commands** – `/overview`, `/failed`, `/help` for quick insights
+- 🔒 **Encrypted Storage** – API Keys encrypted securely
+- 🕐 **Automated Checks** – Cron job runs every 5 minutes
+- 🚀 **Fast Setup** – Add your project details & start monitoring in minutes
 
 ## 🌍 Supported Regions
 
@@ -49,11 +52,13 @@ Monitor your Appwrite deployments globally across all available regions:
 ## 🚀 How It Works
 
 1. **Login** with GitHub
-2. **Add** your Appwrite Project ID, API Key, and email
-3. **Monitor** - Sendra automatically checks your Sites and Functions deployments every 2 minutes
-4. **Get Alerted** - Receive email notifications only for NEW failed deployments
-5. **AI Analysis** - Failed deployment logs are analyzed using AI, and Sendra suggests potential fixes
-6. **Stay Updated** - View latest deployment status on your dashboard
+2. **Add Your Project** – Project ID, API Key, region, and email
+3. **Sendra Monitors Automatically** – Cron checks deployments every 5 minutes
+4. **Get Alerts** – Email notifications for **new** failed deployments
+5. **AI Analysis** – Logs analyzed to suggest potential fixes
+6. **Use Command Interface** – Quickly get insights via slash commands like  
+   `/overview`, `/failed`, `/help`
+7. **Check Dashboard** – View real-time status, history, and analytics anytime
 
 ## 📦 Installation & Setup
 
@@ -91,6 +96,7 @@ NEXT_PUBLIC_APPWRITE_COLLECTION_ID=
 NEXT_PUBLIC_APPWRITE_FETCH_DEPLOYMENTS_FUNCTION_ID=
 NEXT_PUBLIC_APPWRITE_ENCRYPTION_SECRET=
 
+RESEND_API_KEY=
 RESEND_INBOUND_WEBHOOK_SECRET=
 ```
 
