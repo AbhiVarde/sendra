@@ -1,6 +1,6 @@
 import React from "react";
 import { Box, Container, Typography } from "@mui/material";
-import { Database, Activity, Mail, BarChart3, Shield } from "lucide-react";
+import { Database, Activity, Mail, BarChart3, Shield, MessageSquare, Sparkles } from "lucide-react";
 
 interface FeatureSectionProps {
   darkMode: boolean;
@@ -10,33 +10,44 @@ const FeatureSection: React.FC<FeatureSectionProps> = ({ darkMode }) => {
   const features = [
     {
       icon: Database,
-      title: "Connect Appwrite Projects",
+      title: "Connect Projects",
       description:
-        "Add your Appwrite Project ID and API Key to start monitoring both Sites and Functions deployments.",
+        "Link your Appwrite projects with API keys to start monitoring instantly.",
     },
     {
       icon: Activity,
-      title: "Real-time Deployment Monitoring",
+      title: "Real-time Monitoring",
       description:
-        "Automatically checks deployment status for Sites and Functions and logs updates every few minutes.",
+        "Track deployment status for Sites and Functions automatically.",
     },
     {
       icon: Mail,
-      title: "Email Notifications",
+      title: "Email Alerts",
       description:
-        "Instantly alerts you via Resend whenever a deployment fails, for both Sites and Functions.",
+        "Get instant notifications when deployments fail with direct console links.",
+    },
+
+    {
+      icon: MessageSquare,
+      title: "Command Interface",
+      description:
+        "Reply with /overview, /failed, or /help to get deployment insights.",
+    },
+    {
+      icon: Sparkles,
+      title: "AI Analysis",
+      description:
+        "Receive intelligent failure analysis and fix recommendations.",
     },
     {
       icon: BarChart3,
-      title: "Dashboard Overview",
-      description:
-        "View recent deployments with status, branch, time, and detailed analytics for Sites and Functions.",
+      title: "Dashboard",
+      description: "View deployment history with status and analytics.",
     },
     {
       icon: Shield,
-      title: "Secure API Storage",
-      description:
-        "Your Appwrite API keys are safely encrypted and stored in the database.",
+      title: "Secure Storage",
+      description: "API keys encrypted with industry-standard security.",
     },
   ];
 
@@ -90,17 +101,38 @@ const FeatureSection: React.FC<FeatureSectionProps> = ({ darkMode }) => {
             gridTemplateColumns: {
               xs: "1fr",
               sm: "repeat(2, 1fr)",
-              lg: "repeat(6, 1fr)",
+              md: "repeat(3, 1fr)",
             },
             gap: 2,
-            justifyContent: "center",
             maxWidth: "1200px",
             mx: "auto",
-            "& > *:nth-of-type(1)": { gridColumn: { lg: "1 / 3" } },
-            "& > *:nth-of-type(2)": { gridColumn: { lg: "3 / 5" } },
-            "& > *:nth-of-type(3)": { gridColumn: { lg: "5 / 7" } },
-            "& > *:nth-of-type(4)": { gridColumn: { lg: "2 / 4" } },
-            "& > *:nth-of-type(5)": { gridColumn: { lg: "4 / 6" } },
+
+            // Desktop layout exactly like your screenshot
+            "& > *:nth-of-type(1)": {
+              md: { gridColumn: "1 / 2", gridRow: "1" },
+            },
+            "& > *:nth-of-type(2)": {
+              md: { gridColumn: "2 / 3", gridRow: "1" },
+            },
+            "& > *:nth-of-type(3)": {
+              md: { gridColumn: "3 / 4", gridRow: "1" },
+            },
+
+            "& > *:nth-of-type(4)": {
+              md: { gridColumn: "1 / 3", gridRow: "2" },
+            }, // Wide card
+
+            "& > *:nth-of-type(5)": {
+              md: { gridColumn: "3 / 4", gridRow: "2" },
+            },
+
+            "& > *:nth-of-type(6)": {
+              md: { gridColumn: "1 / 2", gridRow: "3" },
+            },
+
+            "& > *:nth-of-type(7)": {
+              md: { gridColumn: "2 / 4", gridRow: "3" },
+            }, // Wide card
           }}
         >
           {features.map((feature, index) => (
