@@ -84,7 +84,7 @@ const Header: React.FC<HeaderProps> = ({
         <Box component="span" sx={{ fontWeight: 500, mx: 0.4 }}>
           Sync UI
         </Box>
-        (80+ GitHub stars, used in 85+ countries) →
+        (85+ GitHub stars, used in 90+ countries) →
         <a
           href="https://syncui.design"
           target="_blank"
