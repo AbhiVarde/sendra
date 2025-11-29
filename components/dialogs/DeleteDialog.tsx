@@ -10,7 +10,6 @@ import {
 } from "@mui/material";
 import { TransitionProps } from "@mui/material/transitions";
 
-// Transition for sliding up
 const Transition = forwardRef(function Transition(
   props: TransitionProps & { children: React.ReactElement },
   ref: React.Ref<unknown>
@@ -36,6 +35,7 @@ const DeleteDialog: React.FC<DeleteDialogProps> = ({
       open={open}
       onClose={onCancel}
       TransitionComponent={Transition}
+      transitionDuration={300}
       keepMounted
       PaperProps={{
         sx: {

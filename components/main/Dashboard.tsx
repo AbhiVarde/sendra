@@ -30,11 +30,14 @@ import {
   Trash2,
   ChevronDown,
   ExternalLink,
+  QrCode,
 } from "lucide-react";
 import { databases, functions } from "@/lib/appwrite";
 import { ID, Query } from "appwrite";
 import { toast } from "sonner";
+import { getCleanAvatar, getRegionFlag, getProjectQR } from "@/lib/avatarUtils";
 import DeleteDialog from "../dialogs/DeleteDialog";
+import QrDialog from "../dialogs/QrDialog";
 
 interface DashboardProps {
   darkMode: boolean;
@@ -112,6 +115,9 @@ const Dashboard: React.FC<DashboardProps> = ({
 }) => {
   const [showForm, setShowForm] = useState(showFormProp ?? false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [qrDialogOpen, setQrDialogOpen] = useState(false);
+  const [qrProjectId, setQrProjectId] = useState<string>("");
+  const [qrRegion, setQrRegion] = useState<string>("");
 
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(false);
@@ -870,10 +876,14 @@ const Dashboard: React.FC<DashboardProps> = ({
                 >
                   <Avatar
                     alt={user?.name || "User"}
-                    src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
-                      user?.name || "User"
-                    )}&background=random`}
-                    sx={{ width: 40, height: 40 }}
+                    src={getCleanAvatar(user?.name || "User", darkMode, 80)}
+                    sx={{
+                      width: 40,
+                      height: 40,
+                      border: `1px solid ${
+                        darkMode ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.15)"
+                      }`,
+                    }}
                   />
                   <Box sx={{ minWidth: 0 }}>
                     <Typography
@@ -1409,7 +1419,7 @@ const Dashboard: React.FC<DashboardProps> = ({
                           sx={{
                             display: "flex",
                             alignItems: "center",
-                            gap: 1,
+                            gap: 0.75,
                             minWidth: 0,
                           }}
                         >
@@ -1429,8 +1439,9 @@ const Dashboard: React.FC<DashboardProps> = ({
                             label={project.isActive ? "Active" : "Inactive"}
                             size="small"
                             sx={{
-                              fontSize: "14px",
+                              fontSize: "12px",
                               fontWeight: 500,
+                              height: 22,
                               backgroundColor: project.isActive
                                 ? darkMode
                                   ? "rgba(74, 222, 128, 0.1)"
@@ -1448,14 +1459,126 @@ const Dashboard: React.FC<DashboardProps> = ({
                             }}
                           />
 
-                          <IconButton
-                            size="small"
-                            color="error"
-                            onClick={() => handleDeleteClick(project)}
-                            disabled={deleting === project.$id}
+                          <Tooltip
+                            title={`Region: ${project.region.toUpperCase()}`}
+                            arrow
+                            placement="top"
+                            slotProps={{
+                              tooltip: {
+                                sx: {
+                                  backgroundColor: darkMode
+                                    ? "#FFFFFF"
+                                    : "#000000",
+                                  color: darkMode ? "#000000" : "#FFFFFF",
+                                  fontSize: "11px",
+                                  borderRadius: "6px",
+                                  border: darkMode
+                                    ? "1px solid rgba(0,0,0,0.1)"
+                                    : "1px solid rgba(255,255,255,0.1)",
+                                  boxShadow: darkMode
+                                    ? "0 2px 8px rgba(0,0,0,0.25)"
+                                    : "0 2px 8px rgba(0,0,0,0.15)",
+                                  padding: "6px 10px",
+                                },
+                              },
+                              arrow: {
+                                sx: {
+                                  color: darkMode ? "#FFFFFF" : "#000000",
+                                },
+                              },
+                            }}
                           >
-                            <Trash2 size={16} />
-                          </IconButton>
+                            <Box
+                              component="img"
+                              src={getRegionFlag(project.region, 24, 24)}
+                              alt={project.region}
+                              sx={{
+                                width: 18,
+                                height: 18,
+                                borderRadius: "3px",
+                                objectFit: "cover",
+                                border: `1px solid ${
+                                  darkMode
+                                    ? "rgba(255,255,255,0.15)"
+                                    : "rgba(0,0,0,0.15)"
+                                }`,
+                              }}
+                            />
+                          </Tooltip>
+
+                          <Box sx={{ display: "flex", gap: 0.5, ml: 0.5 }}>
+                            <Tooltip
+                              title="Share QR Code"
+                              arrow
+                              placement="top"
+                              slotProps={{
+                                tooltip: {
+                                  sx: {
+                                    backgroundColor: darkMode
+                                      ? "#FFFFFF"
+                                      : "#000000",
+                                    color: darkMode ? "#000000" : "#FFFFFF",
+                                    fontSize: "11px",
+                                    borderRadius: "6px",
+                                    border: darkMode
+                                      ? "1px solid rgba(0,0,0,0.1)"
+                                      : "1px solid rgba(255,255,255,0.1)",
+                                    boxShadow: darkMode
+                                      ? "0 2px 8px rgba(0,0,0,0.25)"
+                                      : "0 2px 8px rgba(0,0,0,0.15)",
+                                    padding: "6px 10px",
+                                  },
+                                },
+                                arrow: {
+                                  sx: {
+                                    color: darkMode ? "#FFFFFF" : "#000000",
+                                  },
+                                },
+                              }}
+                            >
+                              <IconButton
+                                size="small"
+                                onClick={() => {
+                                  setQrProjectId(project.projectId);
+                                  setQrRegion(project.region);
+                                  setQrDialogOpen(true);
+                                }}
+                                sx={{
+                                  width: 28,
+                                  height: 28,
+                                  color: darkMode ? "#60a5fa" : "#2563eb",
+                                  "&:hover": {
+                                    backgroundColor: darkMode
+                                      ? "rgba(96, 165, 250, 0.1)"
+                                      : "rgba(37, 99, 235, 0.1)",
+                                  },
+                                }}
+                              >
+                                <QrCode size={14} />
+                              </IconButton>
+                            </Tooltip>
+
+                            <IconButton
+                              size="small"
+                              onClick={() => handleDeleteClick(project)}
+                              disabled={deleting === project.$id}
+                              sx={{
+                                width: 28,
+                                height: 28,
+                                color: darkMode ? "#f87171" : "#dc2626",
+                                "&:hover": {
+                                  backgroundColor: darkMode
+                                    ? "rgba(248, 113, 113, 0.1)"
+                                    : "rgba(220, 38, 38, 0.1)",
+                                },
+                                "&.Mui-disabled": {
+                                  color: darkMode ? "#666666" : "#999999",
+                                },
+                              }}
+                            >
+                              <Trash2 size={14} />
+                            </IconButton>
+                          </Box>
                         </Box>
 
                         <Box sx={{ display: "flex", gap: 3 }}>
@@ -2139,6 +2262,15 @@ const Dashboard: React.FC<DashboardProps> = ({
           )}
         </Stack>
       </Container>
+
+      <QrDialog
+        open={qrDialogOpen}
+        darkMode={darkMode}
+        qrProjectId={qrProjectId}
+        qrRegion={qrRegion}
+        onClose={() => setQrDialogOpen(false)}
+        getProjectQR={getProjectQR}
+      />
 
       <DeleteDialog
         open={deleteConfirmOpen}
