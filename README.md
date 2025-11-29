@@ -19,6 +19,7 @@ Appwrite doesn't send email notifications for failed deployments like Vercel doe
 - 📡 **Automatic Monitoring** – Tracks Sites & Functions deployments in real time
 - 📊 **Dashboard Overview** – View latest status, history, and analytics
 - 🌍 **Region Support** – Works across all 6 Appwrite Cloud regions
+- 👤 **Appwrite Avatars** – Clean user initials, region flags, and QR codes
 - 📧 **Email Alerts** – Alerts you instantly for **new** failed deployments
 - 🧠 **AI Log Analysis** – Explains failure logs & suggests possible fixes
 - 💬 **Slash Commands** – `/overview`, `/failed`, `/help` for quick insights
@@ -44,6 +45,7 @@ Monitor your Appwrite deployments globally across all available regions:
 - **Frontend:** Next.js, Material UI, TypeScript
 - **Backend:** Appwrite Functions & Database
 - **Authentication:** GitHub OAuth
+- **UI Enhancements:** Appwrite Avatars (initials, flags, QR)
 - **Email Service:** Resend API
 - **AI Analysis**: Vercel AI SDK powered by Gemini
 - **Deployment:** Vercel
