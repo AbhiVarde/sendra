@@ -58,7 +58,7 @@ const QrDialog: React.FC<QrDialogProps> = ({
             mb: 2,
           }}
         >
-          Share: {qrProjectId}
+          Open on another device
         </Typography>
 
         <Box
@@ -84,7 +84,7 @@ const QrDialog: React.FC<QrDialogProps> = ({
             mb: 2,
           }}
         >
-          Scan to view project
+          Scan to open your project on another device
         </Typography>
 
         <Button
